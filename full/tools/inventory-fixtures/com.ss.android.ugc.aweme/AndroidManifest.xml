@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.ss.android.ugc.aweme" android:versionCode="9901504" android:versionName="9.9.1504"><uses-sdk android:minSdkVersion="21" android:targetSdkVersion="23"/><application android:label="抖音定制版" android:hasCode="false"/></manifest>

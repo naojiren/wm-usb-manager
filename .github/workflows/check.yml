@@ -1,0 +1,28 @@
+name: Source checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  policy-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Check policies
+        run: bash tools/check.sh
+      - name: Install Android SDK components
+        run: |
+          task_sdkmanager=$(command -v sdkmanager || true)
+          if [ -z "$task_sdkmanager" ]; then task_sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"; fi
+          "$task_sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Compile both variants without signing keys
+        run: |
+          bash tools/build.sh full
+          bash tools/build.sh lite

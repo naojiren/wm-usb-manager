@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.didjdk.adbhelper" android:versionCode="17" android:versionName="1.3.1"><uses-sdk android:minSdkVersion="19" android:targetSdkVersion="23"/><application android:label="甲壳虫 ADB（手机用）" android:hasCode="false"/></manifest>

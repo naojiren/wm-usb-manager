@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.wmhome.launcher" android:versionCode="1019" android:versionName="0.1.0-wm19"><uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23"/><application android:label="威马桌面" android:hasCode="false"/></manifest>

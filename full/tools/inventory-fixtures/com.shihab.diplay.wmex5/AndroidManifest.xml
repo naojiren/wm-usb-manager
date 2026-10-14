@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.shihab.diplay.wmex5" android:versionCode="63" android:versionName="0.2.17-legacy.1-wm-ex5-perf19-audio"><uses-sdk android:minSdkVersion="19" android:targetSdkVersion="23"/><application android:label="DiPlay" android:hasCode="false"/></manifest>

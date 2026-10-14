@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.estrongs.android.pop" android:versionCode="10034" android:versionName="4.2.0.2.3"><uses-sdk android:minSdkVersion="14" android:targetSdkVersion="23"/><application android:label="ES 文件管理器" android:hasCode="false"/></manifest>

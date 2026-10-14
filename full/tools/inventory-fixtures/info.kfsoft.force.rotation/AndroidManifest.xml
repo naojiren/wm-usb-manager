@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="info.kfsoft.force.rotation" android:versionCode="52" android:versionName="1.0.52"><uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23"/><application android:label="强制旋转" android:hasCode="false"/></manifest>

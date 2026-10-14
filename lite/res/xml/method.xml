@@ -1,0 +1,3 @@
+<input-method xmlns:android="http://schemas.android.com/apk/res/android">
+    <subtype android:label="向导备用键盘" android:imeSubtypeLocale="en_US" android:imeSubtypeMode="keyboard"/>
+</input-method>

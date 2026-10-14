@@ -1,0 +1,217 @@
+[
+  {
+    "file": "adb工具.apk",
+    "package": "com.car.adbswitch",
+    "versionName": "1.0",
+    "versionCode": 1,
+    "minSdk": 21,
+    "abis": [],
+    "sha256": "5dc66caceacda47b341fcf7fbe4099ee6fe633c52308f8561d863eacbcc974eb",
+    "label": "ADB 工具",
+    "description": "车机 ADB 开关，便于连接调试和管理软件。",
+    "selected": true,
+    "priority": 0
+  },
+  {
+    "file": "WePlay-WM-EX5-perf24-armv7.apk",
+    "package": "com.shihab.diplay.wmex5",
+    "versionName": "0.2.17-legacy.1-wm-ex5-perf24-control",
+    "versionCode": 68,
+    "minSdk": 19,
+    "abis": [
+      "armeabi-v7a"
+    ],
+    "sha256": "49e61689573bf0c03e6114fe4e70a805633af654d3e83271bd4fc81378b6c31a",
+    "label": "DiPlay",
+    "description": "CarPlay 连接与投屏，适用于此威马车机版本。",
+    "selected": true,
+    "priority": 1
+  },
+  {
+    "file": "WM-Launcher-0.1.0-wm23-android6.apk",
+    "package": "com.wmhome.launcher",
+    "versionName": "0.1.0-wm23",
+    "versionCode": 1023,
+    "minSdk": 23,
+    "abis": [],
+    "sha256": "0c5627599dc2a70f47f4228a137c6a9aff58b389750fe567fd427dc811e69367",
+    "label": "威马桌面",
+    "description": "威马车机桌面；安装后可自行选择默认桌面。",
+    "selected": true,
+    "priority": 2
+  },
+  {
+    "file": "6ES文件浏览器v4.2.0.2.3(10034).apk",
+    "package": "com.estrongs.android.pop",
+    "versionName": "4.2.0.2.3",
+    "versionCode": 10034,
+    "minSdk": 14,
+    "abis": [
+      "armeabi",
+      "armeabi-v7a",
+      "x86"
+    ],
+    "sha256": "b981a73d5e2debe76ea008a2ea63ea50cdaaab2bb0592091c5bfa609e4c4c983",
+    "label": "ES 文件管理器",
+    "description": "浏览 U 盘和车机文件，支持复制、移动与文件管理。",
+    "selected": true,
+    "priority": 3
+  },
+  {
+    "file": "2强制旋转.apk",
+    "package": "info.kfsoft.force.rotation",
+    "versionName": "1.0.52",
+    "versionCode": 52,
+    "minSdk": 23,
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86",
+      "x86_64"
+    ],
+    "sha256": "31dc568eb358d98a8121e7bfc74bfc5de8f49cc19aa8a2873aa7e335d4127653",
+    "label": "强制旋转",
+    "description": "控制应用横竖屏；首次使用可能需开启相关系统权限。",
+    "selected": true,
+    "priority": 4
+  },
+  {
+    "file": "3高德_V7.1.0.600067_仪表盘投屏版.apk",
+    "package": "com.autonavi.amapauto",
+    "versionName": "7.1.0.600067_chenmo",
+    "versionCode": 19000197,
+    "minSdk": 14,
+    "abis": [
+      "armeabi-v7a"
+    ],
+    "sha256": "e04f5a80fa1d7569b6638e1a2adf795efef6d6d02cc055f9de8a128fb0115197",
+    "label": "高德地图",
+    "description": "高德导航及仪表投屏版本；投屏效果取决于车机适配。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "bilibili车机版__v2.6.0.apk",
+    "package": "com.bilibili.bilithings",
+    "versionName": "2.6.0",
+    "versionCode": 2060018,
+    "minSdk": 21,
+    "abis": [
+      "armeabi-v7a"
+    ],
+    "sha256": "4e478562e03aadbfde3997a49c4725d63dd294dbde3fd86be8d5f09b5c30b7e7",
+    "label": "哔哩哔哩车机版",
+    "description": "哔哩哔哩视频车机版，需要联网；请停车后观看。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "甲壳虫ADB（装在手机上）.apk",
+    "package": "com.didjdk.adbhelper",
+    "versionName": "1.3.1",
+    "versionCode": 17,
+    "minSdk": 19,
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a"
+    ],
+    "sha256": "7b9a8ab96b250c67d65ccd8b446decb7b2adf350eed434ae79f67baf7888faf9",
+    "label": "甲壳虫 ADB（手机用）",
+    "description": "通常装在手机上，用于通过 ADB 管理车机，无需默认装入车机。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "(超好用局域网快传)LANShare.apk",
+    "package": "com.fgsqw.lanshare",
+    "versionName": "1.0.4",
+    "versionCode": 2300216,
+    "minSdk": 16,
+    "abis": [],
+    "sha256": "607fda7dbd06f5e652d7e7f4da6963f0d2053102781a3bd6f0d0c64db2ee6d12",
+    "label": "LANShare 局域网快传",
+    "description": "同一局域网内传送文件，方便手机与车机互传。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "网易云音乐-4.3.1-经典版.apk",
+    "package": "com.netease.cloudmusic",
+    "versionName": "4.3.1",
+    "versionCode": 110,
+    "minSdk": 16,
+    "abis": [
+      "armeabi"
+    ],
+    "sha256": "fb4caf2fb34d6207283511a81cb95c763714bdcb8ad20a805ac3d1f7554dfd39",
+    "label": "网易云音乐经典版",
+    "description": "网易云音乐旧版手机界面，可与车机版按需选择。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "4网易云音乐车机版3.1.0.apk",
+    "package": "com.netease.cloudmusic.iot",
+    "versionName": "3.1.0",
+    "versionCode": 30100,
+    "minSdk": 21,
+    "abis": [
+      "armeabi-v7a"
+    ],
+    "sha256": "ff6cdc364f6ab5cbbf71e37f7d26a71b11a2cffd6c456525ab4126db39861008",
+    "label": "网易云音乐车机版",
+    "description": "网易云音乐车机界面，提供在线音乐播放。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "抖音-9.9-小爱音箱定制版.apk",
+    "package": "com.ss.android.ugc.aweme",
+    "versionName": "9.9.1504",
+    "versionCode": 9901504,
+    "minSdk": 21,
+    "abis": [
+      "armeabi-v7a"
+    ],
+    "sha256": "5f25a4581f3851bd8492fe00369f95a6e1a64067d6146fa8d7f45ec6492659f3",
+    "label": "抖音定制版",
+    "description": "抖音定制版本，需要联网；请停车后观看。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "华为HIcar.apk",
+    "package": "com.syu.hicar",
+    "versionName": "1.1    2107051036",
+    "versionCode": 2107051036,
+    "minSdk": 23,
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "sha256": "ebe85e7df2cecbb22b5b9590c2151f95a261433764e69a9151b2d8efa1af4b9b",
+    "label": "华为 HiCar",
+    "description": "华为手机互联；连接效果取决于手机与车机支持。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "file": "亿联车机版6.10-202309011014.release.apk",
+    "package": "net.easyconn",
+    "versionName": "6.10-75c91b2f3-202309011014",
+    "versionCode": 1561240,
+    "minSdk": 16,
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86",
+      "x86_64"
+    ],
+    "sha256": "e6e22a825e776ededdb0fce5ce4df21f5960ea7d0745eb03b55f9f7345e18a15",
+    "label": "亿联车机版",
+    "description": "手机与车机互联、投屏，需配合对应手机端使用。",
+    "selected": false,
+    "priority": 100
+  }
+]

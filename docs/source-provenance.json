@@ -1,0 +1,218 @@
+{
+  "managerVersion": "1.3.0",
+  "package": "com.wm.usbmanager",
+  "minSdk": 23,
+  "fullManagerSha256": "68ca8c93d9b18882be9ebdcaf4e9f1d5a1f9b9f83730ae8f67717e8b03521b12",
+  "liteManagerSha256": "b93923c1b26ce117ebc24a6a1bd427c08daa288eab5466da43b35fd69400d048",
+  "bundleDesktop": "0.1.0-wm23",
+  "bundleDiPlay": "0.2.17-legacy.1-wm-ex5-perf24-control",
+  "applicationSourceMatchesLocalDelivery": true,
+  "sourceFiles": [
+    {
+      "file": "full/AndroidManifest.xml",
+      "sha256": "ab8ee7c30f1c2846a1327338eae9fd325d205034df7381f58793663115d9491c"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/BasicIme.java",
+      "sha256": "51b8507d01708ccd68bef25097a0bc172208f02f14cc4e423802e1dc61185d21"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/BridgeClient.java",
+      "sha256": "69d692ac890dcc33bead589eca05630c7c90fa1602205d5791d48b92a23d21ce"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/GitHubRelease.java",
+      "sha256": "ba646fc0f8673ac265b1eee208e5def2086f45710e1b76446f8d59c8e4433003"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/GitHubTrust.java",
+      "sha256": "66eb16921693ebdc840eea3ce2f1c774a454bebb1b22b8182ac20daa0089e8e7"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/MainActivity.java",
+      "sha256": "6cc65dd307164671abf7774d48c9fe2232760537788ae7a53ba573ae8a39ffca"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/Policy.java",
+      "sha256": "977388eea042ce5dd4ffa7bc86aa6a9f7a88b7ac0878a412455356e307531746"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/RootBridge.java",
+      "sha256": "13bb1f24bf08fa2e4ff4ced9c412cdd16df235bb003a79c8607cfbd89ecd3c19"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/UpdatePolicy.java",
+      "sha256": "075ea6fe80ecc3bb4b07194dd9a661515669fe278b734b70a56c9e74c31a6453"
+    },
+    {
+      "file": "full/res/xml/method.xml",
+      "sha256": "9e6e118e886b4c4335d23f63b58272066836c6dacfee1fd47e1d2679c573b2ad"
+    },
+    {
+      "file": "full/usb/start.sh",
+      "sha256": "875e7a9e1c2bbfef0aaebc8be653b3fff711f33abc2bfa41c37ea3145320efa5"
+    },
+    {
+      "file": "full/tools/fixture.xml",
+      "sha256": "b1a3df69754215b9638b7fa83236837899032e8b5f8d9ffbca833cb04dbdd741"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.autonavi.amapauto/AndroidManifest.xml",
+      "sha256": "834515957ab5cd80428ae28e7b5f5ea4d99d5b2d5c18a443a8984ffa98b4b233"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.bilibili.bilithings/AndroidManifest.xml",
+      "sha256": "d2f5e40f336668085f74ef1c1f449c4275398eef146ff323c89a1caa2f4c9df8"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.car.adbswitch/AndroidManifest.xml",
+      "sha256": "cdb175c01d6f0f30603e62e6794ab94d136efb8d02cd71c4071f27a79ab05295"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.didjdk.adbhelper/AndroidManifest.xml",
+      "sha256": "7a89f5f10e948f2df0b6dc795c4d05ebb365f001e5ab4f5263067286d61f8783"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.estrongs.android.pop/AndroidManifest.xml",
+      "sha256": "a869a20dbce23e174bea6275bcfc9d710896582db98fc7684c39b879a8e0405c"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.fgsqw.lanshare/AndroidManifest.xml",
+      "sha256": "37cf0b8b53a9b7bcf1cfb3b1b448bc7f77c6e0223a5974ee17a98ce61e9cf754"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.netease.cloudmusic/AndroidManifest.xml",
+      "sha256": "7f6305a099db8d214d77308d1a2738446dca9b7b6be69950e55a54323b0aa995"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.netease.cloudmusic.iot/AndroidManifest.xml",
+      "sha256": "c46b338b5bb14f801dd206b8ddb7c3c7556553227143bcceb4f2cd7b11623361"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.shihab.diplay.wmex5/AndroidManifest.xml",
+      "sha256": "17ff10c893e600b27fe4621f66b5844fa64be1577cbb91dc8af52478a80189dd"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.ss.android.ugc.aweme/AndroidManifest.xml",
+      "sha256": "a7d4cb2c211c492b7cf51e96c0ceb9e1a06ed8d3b2c3d4a43ec3f75b302dc05c"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.syu.hicar/AndroidManifest.xml",
+      "sha256": "29649faa2d00228908053a2097ed43d1b9c06632ad318451b134e8caab6dd24a"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/com.wmhome.launcher/AndroidManifest.xml",
+      "sha256": "d146f3151e3ee35a8c9b2dfe9b9407367f16568e55ea1a4a3a99920ec45d07a4"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/info.kfsoft.force.rotation/AndroidManifest.xml",
+      "sha256": "98703b45bfccf7eb360aa909e3607d3703908da86448565e272f145fda679ae3"
+    },
+    {
+      "file": "full/tools/inventory-fixtures/net.easyconn/AndroidManifest.xml",
+      "sha256": "f199e51b983601bf444a47656458c41a24eb0eba9ced8792885665b127104ff3"
+    },
+    {
+      "file": "full/tools/PolicyTest.java",
+      "sha256": "42a1274b259c7cbe74c5ddbf4fa9974e4699663af1f8802b64f7436090aa0f14"
+    },
+    {
+      "file": "full/tools/thirdparty-fixture.xml",
+      "sha256": "fe4b0662e82afe6d6bda3cad3c8243dd37da522606bd8473b475ac7cbec64978"
+    },
+    {
+      "file": "full/tools/UpdatePolicyTest.java",
+      "sha256": "91ce2f227d1bf5923d0bc5fc2fd2d39040282dc289d174125470245fc0ba58ed"
+    },
+    {
+      "file": "lite/AndroidManifest.xml",
+      "sha256": "1412f53cee6dc20a69affc2c3f18d6d672fd4870e256d02f6d15b95c0efacf1f"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/BasicIme.java",
+      "sha256": "51b8507d01708ccd68bef25097a0bc172208f02f14cc4e423802e1dc61185d21"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/BridgeClient.java",
+      "sha256": "69d692ac890dcc33bead589eca05630c7c90fa1602205d5791d48b92a23d21ce"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/GitHubRelease.java",
+      "sha256": "ba646fc0f8673ac265b1eee208e5def2086f45710e1b76446f8d59c8e4433003"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/GitHubTrust.java",
+      "sha256": "66eb16921693ebdc840eea3ce2f1c774a454bebb1b22b8182ac20daa0089e8e7"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/MainActivity.java",
+      "sha256": "41cb92326eada954a4e4d68169e2fc2ed11b73a9be30462774a619ed06ebb2e8"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/Policy.java",
+      "sha256": "cefe35a076b2e4edf915e861e5649c8ecafc3948110bff43f3ebb8f29de61528"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/RootBridge.java",
+      "sha256": "3573783ffe30db1f8eeeb5236f79daed46b122acc623ef813f6676c742196d24"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/UpdatePolicy.java",
+      "sha256": "075ea6fe80ecc3bb4b07194dd9a661515669fe278b734b70a56c9e74c31a6453"
+    },
+    {
+      "file": "lite/res/xml/method.xml",
+      "sha256": "9e6e118e886b4c4335d23f63b58272066836c6dacfee1fd47e1d2679c573b2ad"
+    },
+    {
+      "file": "lite/usb/start.sh",
+      "sha256": "875e7a9e1c2bbfef0aaebc8be653b3fff711f33abc2bfa41c37ea3145320efa5"
+    },
+    {
+      "file": "lite/tools/fixture.xml",
+      "sha256": "b1a3df69754215b9638b7fa83236837899032e8b5f8d9ffbca833cb04dbdd741"
+    },
+    {
+      "file": "lite/tools/inventory-fixtures/com.car.adbswitch/AndroidManifest.xml",
+      "sha256": "cdb175c01d6f0f30603e62e6794ab94d136efb8d02cd71c4071f27a79ab05295"
+    },
+    {
+      "file": "lite/tools/inventory-fixtures/com.estrongs.android.pop/AndroidManifest.xml",
+      "sha256": "a869a20dbce23e174bea6275bcfc9d710896582db98fc7684c39b879a8e0405c"
+    },
+    {
+      "file": "lite/tools/inventory-fixtures/com.fgsqw.lanshare/AndroidManifest.xml",
+      "sha256": "37cf0b8b53a9b7bcf1cfb3b1b448bc7f77c6e0223a5974ee17a98ce61e9cf754"
+    },
+    {
+      "file": "lite/tools/inventory-fixtures/com.shihab.diplay.wmex5/AndroidManifest.xml",
+      "sha256": "17ff10c893e600b27fe4621f66b5844fa64be1577cbb91dc8af52478a80189dd"
+    },
+    {
+      "file": "lite/tools/inventory-fixtures/com.wmhome.launcher/AndroidManifest.xml",
+      "sha256": "d146f3151e3ee35a8c9b2dfe9b9407367f16568e55ea1a4a3a99920ec45d07a4"
+    },
+    {
+      "file": "lite/tools/inventory-fixtures/info.kfsoft.force.rotation/AndroidManifest.xml",
+      "sha256": "98703b45bfccf7eb360aa909e3607d3703908da86448565e272f145fda679ae3"
+    },
+    {
+      "file": "lite/tools/PolicyTest.java",
+      "sha256": "d5523932eed1e167db723fd808f5b5ac95e19081bdead852c72c5d3f84c808b2"
+    },
+    {
+      "file": "lite/tools/thirdparty-fixture.xml",
+      "sha256": "fe4b0662e82afe6d6bda3cad3c8243dd37da522606bd8473b475ac7cbec64978"
+    },
+    {
+      "file": "lite/tools/UpdatePolicyTest.java",
+      "sha256": "91ce2f227d1bf5923d0bc5fc2fd2d39040282dc289d174125470245fc0ba58ed"
+    },
+    {
+      "file": "usb-bootstrap/yfautorun.sh",
+      "sha256": "0e87111dc5f9a7c4774d234bfd4a53a1e26cc4a5f48b7bac118c8de2858b891e"
+    }
+  ],
+  "privateKeysIncluded": false,
+  "rawVehicleDiagnosticsIncluded": false
+}

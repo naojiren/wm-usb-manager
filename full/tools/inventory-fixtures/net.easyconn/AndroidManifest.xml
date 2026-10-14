@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="net.easyconn" android:versionCode="1561240" android:versionName="6.10-75c91b2f3-202309011014"><uses-sdk android:minSdkVersion="16" android:targetSdkVersion="23"/><application android:label="亿联车机版" android:hasCode="false"/></manifest>

@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.fgsqw.lanshare" android:versionCode="2300216" android:versionName="1.0.4"><uses-sdk android:minSdkVersion="16" android:targetSdkVersion="23"/><application android:label="LANShare 局域网快传" android:hasCode="false"/></manifest>

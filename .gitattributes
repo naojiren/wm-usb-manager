@@ -1,0 +1,6 @@
+* text=auto eol=lf
+full/** -text
+lite/** -text
+usb-bootstrap/** -text
+*.zip binary
+*.png binary
