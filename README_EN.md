@@ -10,7 +10,7 @@ The application displays its Chinese title, “威马车机软件向导”. This
 
 Download the full or lite bundle from [Releases](https://github.com/naojiren/wm-usb-manager/releases) and verify it with the supplied SHA-256 files.
 
-The current wizard is version 1.3.0. The bundles include WM Launcher wm23 (versionCode 1023) and DiPlay / WePlay perf24-control (versionCode 68).
+The current wizard is version 1.3.0. The bundles include WM Launcher wm26 (versionCode 1026) and DiPlay / WePlay perf29-screen-keys (versionCode 73).
 
 | Bundle | Installation APKs | Factory restoration APKs |
 |---|---|---|
@@ -37,7 +37,7 @@ The factory removal list covers navigation, the input method, entertainment appl
 
 The installation page can manually check public Releases for [WM Launcher](https://github.com/naojiren/wm-launcher/releases) and [DiPlay](https://github.com/naojiren/diplay-wm/releases). Downloads are checked for their hash, signing certificate, package name, version, and architecture before replacing the APK on the USB drive. The updated application must then be selected and installed explicitly.
 
-Known limitation: wizard 1.3.0 only accepts DiPlay release assets whose filenames start with diplay-wm-ex5-. The perf24 Release currently uses WePlay-WM-EX5-perf24-armv7.apk, so the online asset filter cannot match it. The bundles already contain perf24 for local installation. The published application source preserves the delivered version.
+Known limitation: wizard 1.3.0 only accepts DiPlay release assets whose filenames start with diplay-wm-ex5-. The bundled WePlay-perf29-armv7.apk does not follow this naming convention. The installation page can scan and install the local APK; online checks reflect public Releases and may differ from the bundled version. The wizard application and its online-update logic remain unchanged.
 
 ## Compatibility and Privileges
 

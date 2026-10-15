@@ -13,28 +13,28 @@
     "priority": 0
   },
   {
-    "file": "WePlay-WM-EX5-perf24-armv7.apk",
+    "file": "WePlay-perf29-armv7.apk",
     "package": "com.shihab.diplay.wmex5",
-    "versionName": "0.2.17-legacy.1-wm-ex5-perf24-control",
-    "versionCode": 68,
+    "versionName": "0.2.17-legacy.1-wm-ex5-perf29-screen-keys",
+    "versionCode": 73,
     "minSdk": 19,
     "abis": [
       "armeabi-v7a"
     ],
-    "sha256": "49e61689573bf0c03e6114fe4e70a805633af654d3e83271bd4fc81378b6c31a",
+    "sha256": "dd6ceee7b3faf9f0274e8f9809209e75fe1633fda80564e7f4564310212f9282",
     "label": "DiPlay",
     "description": "CarPlay 连接与投屏，适用于此威马车机版本。",
     "selected": true,
     "priority": 1
   },
   {
-    "file": "WM-Launcher-0.1.0-wm23-android6.apk",
+    "file": "WM-Launcher-0.1.0-wm26-android6.apk",
     "package": "com.wmhome.launcher",
-    "versionName": "0.1.0-wm23",
-    "versionCode": 1023,
+    "versionName": "0.1.0-wm26",
+    "versionCode": 1026,
     "minSdk": 23,
     "abis": [],
-    "sha256": "0c5627599dc2a70f47f4228a137c6a9aff58b389750fe567fd427dc811e69367",
+    "sha256": "aac663d7ab4c28e9ac245557df0bdacd9080bf930026a23186c3379f776083e2",
     "label": "威马桌面",
     "description": "威马车机桌面；安装后可自行选择默认桌面。",
     "selected": true,

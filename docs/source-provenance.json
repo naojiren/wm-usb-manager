@@ -4,8 +4,8 @@
   "minSdk": 23,
   "fullManagerSha256": "68ca8c93d9b18882be9ebdcaf4e9f1d5a1f9b9f83730ae8f67717e8b03521b12",
   "liteManagerSha256": "b93923c1b26ce117ebc24a6a1bd427c08daa288eab5466da43b35fd69400d048",
-  "bundleDesktop": "0.1.0-wm23",
-  "bundleDiPlay": "0.2.17-legacy.1-wm-ex5-perf24-control",
+  "bundleDesktop": "0.1.0-wm26",
+  "bundleDiPlay": "0.2.17-legacy.1-wm-ex5-perf29-screen-keys",
   "applicationSourceMatchesLocalDelivery": true,
   "sourceFiles": [
     {

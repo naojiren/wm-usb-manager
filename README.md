@@ -8,7 +8,7 @@
 
 在 [Releases](https://github.com/naojiren/wm-usb-manager/releases) 下载完整包或精简包，并用附带 SHA-256 文件核对。
 
-当前向导为 1.3.0；软件包内威马桌面为 wm23（1023），DiPlay / WePlay 为 perf24-control（68）。
+当前向导为 1.3.0；软件包内威马桌面为 wm26（1026），DiPlay / WePlay 为 perf29-screen-keys（73）。
 
 | 包 | 安装软件 | 原厂恢复包 |
 |---|---|---|
@@ -35,7 +35,7 @@
 
 安装页可以手动查询 [威马桌面](https://github.com/naojiren/wm-launcher/releases) 与 [DiPlay](https://github.com/naojiren/diplay-wm/releases) 的公开 Release，下载经过哈希、签名、包名、版本和架构检查的 APK 到 U 盘；之后仍需要勾选并安装。
 
-已知限制：当前向导 1.3.0 的 DiPlay 资产筛选要求文件名以 diplay-wm-ex5- 开头，perf24 Release 当前使用 WePlay-WM-EX5-perf24-armv7.apk，在线查询无法匹配该资产。Release 内已附 perf24 APK，可从本地安装。本次公开源码保持交付版本原样。
+已知限制：向导 1.3.0 的 DiPlay 在线资产筛选要求文件名以 diplay-wm-ex5- 开头，本包的 WePlay-perf29-armv7.apk 不符合该命名形式。安装页可以扫描并安装本地 APK；在线查询只反映公开 Release，可能与本包版本不同。向导程序和在线更新逻辑保持原样。
 
 ## 适配与权限
 
