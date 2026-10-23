@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.io.OutputStream;
 
 public final class BridgeClient {
+    public static boolean resident;
     public static JSONObject call(JSONObject request) throws Exception { return call(request, false); }
     public static JSONObject call(JSONObject request, boolean validation) throws Exception {
         return call(request, validation, 180000);
@@ -13,7 +14,7 @@ public final class BridgeClient {
     public static JSONObject call(JSONObject request, boolean validation, int timeout) throws Exception {
         LocalSocket socket = new LocalSocket();
         try {
-            socket.connect(new LocalSocketAddress(Policy.SOCKET + (validation ? ".validation" : ""), LocalSocketAddress.Namespace.ABSTRACT));
+            socket.connect(new LocalSocketAddress(Policy.SOCKET + (validation ? ".validation" : resident ? ".resident" : ""), LocalSocketAddress.Namespace.ABSTRACT));
             socket.setSoTimeout(timeout);
             OutputStream out = socket.getOutputStream();
             out.write((request.toString() + "\n").getBytes("UTF-8")); out.flush();

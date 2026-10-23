@@ -48,7 +48,17 @@ public final class Policy {
     public static boolean removableThirdParty(String pkg, boolean system, int uid, boolean persistent, boolean role) {
         return !system && uid >= 10000 && !persistent && !role && !protectedInstall(pkg, false);
     }
+    public static String installLabel(String pkg, String fallback, String version) {
+        if (pkg.equals("com.autonavi.amapauto") && "9.1.0.600087".equals(version)) return "高德地图 V9.1（后台仪表投屏测试版）";
+        return installLabel(pkg, fallback);
+    }
+    public static String installDescription(String pkg, String version) {
+        if (pkg.equals("com.autonavi.amapauto") && "9.1.0.600087".equals(version))
+            return "可选。软件包130M，比V7.1增加36M。后台自动仪表投屏测试版；与V7.1为同一软件，请只选择一个版本安装。";
+        return installDescription(pkg);
+    }
     public static String installLabel(String pkg, String fallback) {
+        if (pkg.equals("com.tiger.wm.amapcompanion")) return "仪表伴侣 1.0.44";
         if (pkg.equals("com.car.adbswitch")) return "ADB 工具";
         if (pkg.equals("com.shihab.diplay.wmex5")) return "DiPlay";
         if (pkg.equals("com.wmhome.launcher")) return "威马桌面";
@@ -66,6 +76,7 @@ public final class Policy {
         return fallback;
     }
     public static String installDescription(String pkg) {
+        if (pkg.equals("com.tiger.wm.amapcompanion")) return "可选，安装后与高德V9.1配合使用。";
         if (pkg.equals("com.car.adbswitch")) return "车机 ADB 开关，便于连接调试和管理软件。";
         if (pkg.equals("com.shihab.diplay.wmex5")) return "CarPlay 连接与投屏，适用于此威马车机版本。";
         if (pkg.equals("com.wmhome.launcher")) return "威马车机桌面；安装后可自行选择默认桌面。";

@@ -31,6 +31,7 @@ public final class RootBridge {
     private final File root;
     private final File journal;
     private final boolean validation;
+    private boolean resident;
     private final Map<String, String> tokens = new HashMap<>();
 
     RootBridge(Context c, File usb, boolean test) {
@@ -45,8 +46,14 @@ public final class RootBridge {
         Object thread = at.getMethod("systemMain").invoke(null);
         Context c = (Context) at.getMethod("getSystemContext").invoke(thread);
         RootBridge worker = new RootBridge(c, new File(test ? "/data/local/tmp/wm-usb-validation" : "/mnt/udisk"), test);
+        worker.resident = args.length > 0 && args[0].equals("--resident");
+        if (worker.resident) {
+            worker = new RootBridge(c, new File("/data/local/wm-software-wizard"), false);
+            worker.resident = true; worker.root.mkdirs();
+            run("chown 0:0 /data/local/wm-software-wizard && chmod 700 /data/local/wm-software-wizard", 10);
+        }
         int allowedUid = c.getPackageManager().getApplicationInfo(Policy.PACKAGE, 0).uid;
-        LocalServerSocket server = new LocalServerSocket(test ? Policy.SOCKET + ".validation" : Policy.SOCKET);
+        LocalServerSocket server = new LocalServerSocket(test ? Policy.SOCKET + ".validation" : worker.resident ? Policy.SOCKET + ".resident" : Policy.SOCKET);
         System.out.println("READY root uid=0 allowedUid=" + allowedUid + " validation=" + test);
         System.out.flush();
         while (true) {
@@ -85,16 +92,26 @@ public final class RootBridge {
         String action = q.getString("action");
         if (action.equals("status")) return ok("原厂提权通道就绪").put("uid", android.os.Process.myUid()).put("usb", usbReady());
         if (action.equals("inventory")) return inventory();
+        if (action.equals("install-guide") && !validation && !resident) {
+            if (!usbReady() || !installed(Policy.PACKAGE)) throw new IOException("请从完整 U 盘启动向导后安装");
+            File destination = new File("/data/local/wm-software-wizard"); destination.mkdirs();
+            run("chown 0:0 /data/local/wm-software-wizard && chmod 700 /data/local/wm-software-wizard", 10);
+            if (!destination.isDirectory() || !destination.getCanonicalFile().equals(destination)) throw new IOException("车机工作目录创建失败");
+            android.system.StructStat ds = android.system.Os.stat(destination.getPath());
+            if (ds.st_uid != 0 || (ds.st_mode & 0777) != 0700) throw new IOException("车机工作目录权限错误");
+            return ok("向导已安装到车机。拔出 U 盘后从应用列表打开，仅保留卸载和两款软件联网更新安装；不复制内置软件。重启后需要已有 su 授权。");
+        }
+        if (resident && action.equals("restore")) throw new SecurityException("车机版没有原厂恢复包");
         if (action.equals("probe-keyboard") && validation) return probeKeyboard();
         if (!usbReady()) throw new IOException("U 盘已拔出或文件不完整，请重新插入");
         if (action.equals("remove")) return remove(q.getString("package"));
         if (action.equals("restore")) return restore(q.getString("package"));
-        if (action.equals("install")) return install(q.getString("name"), q.getString("sha256"), q.optBoolean("grant", true));
+        if (action.equals("install")) return install(q.getString("name"), q.getString("sha256"), q.optBoolean("grant", true), q.optBoolean("systemLauncher", true));
         if (action.equals("update-apk")) return updateApk(q);
         throw new SecurityException("操作未获允许");
     }
     private boolean usbReady() {
-        return root.isDirectory() && (validation || (new File(root, "factorymodel").isFile()
+        return root.isDirectory() && (resident || validation || (new File(root, "factorymodel").isFile()
             && new File(root, "wm_manager/manager.apk").isFile()));
     }
     private JSONObject ok(String text) throws Exception { return new JSONObject().put("ok", true).put("message", text); }
@@ -155,11 +172,11 @@ public final class RootBridge {
                     CharSequence label;
                     try { label = p.applicationInfo.loadLabel(pm); } catch (Exception e) { label = p.packageName; }
                     PackageInfo current = packageInfo(p.packageName, false);
-                    row.put("package", p.packageName).put("label", Policy.installLabel(p.packageName, String.valueOf(label))).put("version", p.versionName)
+                    row.put("package", p.packageName).put("label", Policy.installLabel(p.packageName, String.valueOf(label), p.versionName)).put("version", p.versionName)
                         .put("code", p.versionCode).put("sha256", digest).put("eligible", problem.length() == 0)
                         .put("reason", problem).put("existing", current != null ? current.versionName : "")
                         .put("priority", Policy.installRank(p.packageName))
-                        .put("description", Policy.installDescription(p.packageName));
+                        .put("description", Policy.installDescription(p.packageName, p.versionName));
                 } catch (Exception e) { row.put("eligible", false).put("reason", "无法解析或读取：" + cleanError(e)); }
                 rows.add(row);
             }
@@ -265,7 +282,7 @@ public final class RootBridge {
     private JSONObject remove(String pkg) throws Exception {
         requireRemoval(pkg);
         if (!installed(pkg)) return ok("已经移除，无需重复操作");
-        if (Policy.entry(pkg) != null && !new File(root, "wm_manager/original_apks/" + pkg + ".apk").isFile())
+        if (!resident && Policy.entry(pkg) != null && !new File(root, "wm_manager/original_apks/" + pkg + ".apk").isFile())
             throw new IOException("U 盘中缺少对应原厂备份包，已取消删除");
         if (pkg.equals("com.sinovoice.hcicloudinput")) ensureKeyboard();
         String output = run("pm uninstall -k --user 0 " + Policy.quote(pkg), 90);
@@ -338,7 +355,7 @@ public final class RootBridge {
             return ok("已使用 U 盘原厂备份包恢复；默认应用和输入法设置保持用户当前选择");
         } finally { staged.delete(); }
     }
-    private JSONObject install(String name, String expected, boolean grant) throws Exception {
+    private JSONObject install(String name, String expected, boolean grant, boolean systemLauncher) throws Exception {
         File file = Policy.apk(root, name);
         if (!expected.equals(tokens.get(name)) || !expected.equals(sha(file))) throw new SecurityException("APK 已变化，请刷新列表后重新选择");
         // Copy and verify private staging file: USB replacement cannot alter the package mid-install.
@@ -355,6 +372,7 @@ public final class RootBridge {
             if (protectedArchive(p) && !(validation && p.packageName.equals("com.wm.usbfixture")))
                 throw new SecurityException("禁止覆盖系统或车辆程序");
             if (validation && !p.packageName.equals("com.wm.usbfixture")) throw new SecurityException("验证模式仅允许验证软件");
+            if (resident && !p.packageName.equals("com.wmhome.launcher") && !p.packageName.equals("com.shihab.diplay.wmex5")) throw new SecurityException("车机版仅安装桌面和 WePlay");
             String problem = compatible(staged, p);
             if (!problem.isEmpty()) throw new IOException(problem);
             String output = run("pm install -r " + (grant ? "-g " : "") + Policy.quote(staged.getAbsolutePath()), 150);
@@ -367,6 +385,11 @@ public final class RootBridge {
             }
             journal("install", p.packageName, success, output);
             if (!success) throw new IOException("安装或恢复启用失败：" + output);
+            if (systemLauncher && p.packageName.equals("com.wmhome.launcher")) {
+                try { SystemInstaller.install(staged, pm); }
+                catch (Exception e) { throw new IOException("普通安装已完成，但系统分区写入失败：" + cleanError(e)); }
+                return ok("桌面已写入系统分区并校验；请手动重启车机后生效");
+            }
             return ok("安装成功，软件已启用" + (grant ? "，已授予软件声明的运行时权限" : "，权限按 Android 默认处理"));
         } finally { staged.delete(); }
     }
@@ -408,7 +431,7 @@ public final class RootBridge {
             if (!pkg.equals(fresh.packageName)) throw new SecurityException("更新包与选择的软件不符");
             String problem = compatible(staged, fresh);
             if (!problem.isEmpty()) throw new IOException(problem);
-            boolean trusted = false;
+            boolean trusted = trustedSigner(fresh);
             if (old != null) {
                 PackageInfo local = archive(old);
                 if (!pkg.equals(local.packageName) || !sameSigner(fresh, local)) throw new SecurityException("本地包与更新包的签名不一致，已保留原文件");
@@ -429,8 +452,16 @@ public final class RootBridge {
             tokens.remove(oldName); tokens.put(name, expected);
             String message = "已更新 U 盘安装包；勾选后可安装到车机" + (retainedOld ? "。旧文件未能删除，请按需手动清理" : "");
             try { journal("update-apk", pkg, true, name + " " + expected); } catch (IOException ignored) { }
+            if (resident) return install(name, expected, q.optBoolean("grant", true), q.optBoolean("systemLauncher", true)).put("version", fresh.versionName);
             return ok(message).put("name", name).put("version", fresh.versionName).put("sha256", expected);
         } finally { staged.delete(); }
+    }
+    private boolean trustedSigner(PackageInfo p) throws Exception {
+        String expected = p.packageName.equals("com.wmhome.launcher") ? "e2db4c74775d527181c7ca92959fbffaffd273ee2dbff7a143fc8c28687fa1ba" : p.packageName.equals("com.shihab.diplay.wmex5") ? "89a94fd5d7d32fdd26d81c3827c74bb3dc215af91d1fcff0661fd8e1d2c13509" : "";
+        if (p.signatures == null || p.signatures.length != 1) return false;
+        StringBuilder h = new StringBuilder();
+        for (byte b : MessageDigest.getInstance("SHA-256").digest(p.signatures[0].toByteArray())) h.append(String.format(Locale.ROOT, "%02x", b & 255));
+        return expected.equals(h.toString());
     }
     private boolean sameSigner(PackageInfo a, PackageInfo b) {
         return a.signatures != null && a.signatures.length > 0 && Arrays.equals(a.signatures, b.signatures);

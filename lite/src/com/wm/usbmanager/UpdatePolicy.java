@@ -25,7 +25,7 @@ public final class UpdatePolicy {
         String n = name.toLowerCase(Locale.ROOT);
         if (repo.equals("wm-launcher"))
             return n.startsWith("wm-launcher-") && n.endsWith("-android6.apk") ? 10 : -1;
-        if (!n.startsWith("diplay-wm-ex5-")) return -1;
+        if (!n.startsWith("diplay-wm-ex5-") && !n.startsWith("weplay-")) return -1;
         if (n.endsWith("-armv7.apk") || n.endsWith("-armeabi-v7a.apk")) return 10;
         return -1;
     }

@@ -17,6 +17,8 @@ public final class UpdatePolicyTest {
         for (String s : new String[]{"https://github.com.evil.test/x", "https://evilgithubusercontent.com/x", "https://api.github.com:444/x", "https://user@github.com/x", "file:///data/a.apk"}) yes(!UpdatePolicy.transport(s));
         yes(UpdatePolicy.sha("b57892aff87279a952c5e545e62ed07b8b53dc2e57a7d8ea1f9685dc0d02cc5a"));
         yes(!UpdatePolicy.sha("bad")); yes(UpdatePolicy.size(12746240)); yes(!UpdatePolicy.size(0)); yes(!UpdatePolicy.size(UpdatePolicy.MAX_APK + 1));
+        yes(UpdatePolicy.assetRank("diplay-wm", "WePlay-perf32-scan-test-armv7.apk") > 0);
+        yes(UpdatePolicy.assetRank("diplay-wm", "WePlay-perf32-arm64.apk") < 0);
         System.out.println("Update policy assertions passed: " + count);
     }
 }

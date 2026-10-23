@@ -55,7 +55,7 @@ if [ -z "$task_installed" ] || [ ! -f "$task_installed" ]; then exit 1; fi
 # Show the page first. It waits for the worker and scans asynchronously.
 if [ "${1:-}" != "--resume" ]; then
     echo "UI_START $(cat /proc/uptime)"
-    am start --user 0 -n "$task_pkg/.MainActivity"
+    am start --user 0 -n "$task_pkg/.MainActivity" --ez usb_mode true
 fi
 CLASSPATH="$task_installed" toybox nohup /system/bin/app_process /system/bin com.wm.usbmanager.RootBridge > "$task_state/worker.log" 2>&1 < /dev/null &
 task_pid=$!

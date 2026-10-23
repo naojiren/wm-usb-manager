@@ -1,16 +1,35 @@
 {
-  "managerVersion": "1.3.0",
-  "package": "com.wm.usbmanager",
-  "minSdk": 23,
-  "fullManagerSha256": "68ca8c93d9b18882be9ebdcaf4e9f1d5a1f9b9f83730ae8f67717e8b03521b12",
-  "liteManagerSha256": "b93923c1b26ce117ebc24a6a1bd427c08daa288eab5466da43b35fd69400d048",
-  "bundleDesktop": "0.1.0-wm26",
-  "bundleDiPlay": "0.2.17-legacy.1-wm-ex5-perf29-screen-keys",
-  "applicationSourceMatchesLocalDelivery": true,
-  "sourceFiles": [
+  "fullVersion": "1.4.1",
+  "liteVersion": "1.4.0-lite",
+  "date": "2026-10-24",
+  "files": [
     {
       "file": "full/AndroidManifest.xml",
-      "sha256": "ab8ee7c30f1c2846a1327338eae9fd325d205034df7381f58793663115d9491c"
+      "sha256": "1fe5a3174ea99c45a6ace7a1696f52fbf619e295242235d84cee42c34c49b54a"
+    },
+    {
+      "file": "full/tools/fixture.xml",
+      "sha256": "b1a3df69754215b9638b7fa83236837899032e8b5f8d9ffbca833cb04dbdd741"
+    },
+    {
+      "file": "full/tools/PolicyTest.java",
+      "sha256": "bb640fe01fecfdbdaed44fa8ebf89a187c996bf250f02e04b050dfd93216be47"
+    },
+    {
+      "file": "full/tools/thirdparty-fixture.xml",
+      "sha256": "fe4b0662e82afe6d6bda3cad3c8243dd37da522606bd8473b475ac7cbec64978"
+    },
+    {
+      "file": "full/tools/UpdatePolicyTest.java",
+      "sha256": "15b7642c86ad45d83db51bdd71068b5f2e6779b847d916557cee2824b316b2da"
+    },
+    {
+      "file": "full/usb/start.sh",
+      "sha256": "68e30136aa24713a1f0d8cd824e98062ba638492872a586ba4fbd6670b9a3c97"
+    },
+    {
+      "file": "full/res/xml/method.xml",
+      "sha256": "9e6e118e886b4c4335d23f63b58272066836c6dacfee1fd47e1d2679c573b2ad"
     },
     {
       "file": "full/src/com/wm/usbmanager/BasicIme.java",
@@ -18,7 +37,7 @@
     },
     {
       "file": "full/src/com/wm/usbmanager/BridgeClient.java",
-      "sha256": "69d692ac890dcc33bead589eca05630c7c90fa1602205d5791d48b92a23d21ce"
+      "sha256": "6c37a8fab4b74b40cc0787f18c87501ffae214884ce5401fe8ee53aa015a3380"
     },
     {
       "file": "full/src/com/wm/usbmanager/GitHubRelease.java",
@@ -30,31 +49,23 @@
     },
     {
       "file": "full/src/com/wm/usbmanager/MainActivity.java",
-      "sha256": "6cc65dd307164671abf7774d48c9fe2232760537788ae7a53ba573ae8a39ffca"
+      "sha256": "19adcf37696124b4967a229dab198676e3cc5b482ac4534cbf1819a88c123cd2"
     },
     {
       "file": "full/src/com/wm/usbmanager/Policy.java",
-      "sha256": "977388eea042ce5dd4ffa7bc86aa6a9f7a88b7ac0878a412455356e307531746"
+      "sha256": "6cfef5a2df182d5ac0ead2f06dee1de398fabd0337acc74b92e9c976d373e5a2"
     },
     {
       "file": "full/src/com/wm/usbmanager/RootBridge.java",
-      "sha256": "13bb1f24bf08fa2e4ff4ced9c412cdd16df235bb003a79c8607cfbd89ecd3c19"
+      "sha256": "92838807efefe3458cc6971fb22e945e0334d3fcb4b842b1272bd908c0447693"
+    },
+    {
+      "file": "full/src/com/wm/usbmanager/SystemInstaller.java",
+      "sha256": "1b084fdf183447134855fa043081a570039f815597459f0879ec073f26aaa426"
     },
     {
       "file": "full/src/com/wm/usbmanager/UpdatePolicy.java",
-      "sha256": "075ea6fe80ecc3bb4b07194dd9a661515669fe278b734b70a56c9e74c31a6453"
-    },
-    {
-      "file": "full/res/xml/method.xml",
-      "sha256": "9e6e118e886b4c4335d23f63b58272066836c6dacfee1fd47e1d2679c573b2ad"
-    },
-    {
-      "file": "full/usb/start.sh",
-      "sha256": "875e7a9e1c2bbfef0aaebc8be653b3fff711f33abc2bfa41c37ea3145320efa5"
-    },
-    {
-      "file": "full/tools/fixture.xml",
-      "sha256": "b1a3df69754215b9638b7fa83236837899032e8b5f8d9ffbca833cb04dbdd741"
+      "sha256": "6e418e4505ff4d3eb8619533cc4bf522e7f89725f4f1678d90f481ac73581f97"
     },
     {
       "file": "full/tools/inventory-fixtures/com.autonavi.amapauto/AndroidManifest.xml",
@@ -113,20 +124,32 @@
       "sha256": "f199e51b983601bf444a47656458c41a24eb0eba9ced8792885665b127104ff3"
     },
     {
-      "file": "full/tools/PolicyTest.java",
-      "sha256": "42a1274b259c7cbe74c5ddbf4fa9974e4699663af1f8802b64f7436090aa0f14"
+      "file": "lite/AndroidManifest.xml",
+      "sha256": "fab96587c60d217ab2eb15a7defa94a6e99b6934841be02a95010af9dc3edfea"
     },
     {
-      "file": "full/tools/thirdparty-fixture.xml",
+      "file": "lite/tools/fixture.xml",
+      "sha256": "b1a3df69754215b9638b7fa83236837899032e8b5f8d9ffbca833cb04dbdd741"
+    },
+    {
+      "file": "lite/tools/PolicyTest.java",
+      "sha256": "d5523932eed1e167db723fd808f5b5ac95e19081bdead852c72c5d3f84c808b2"
+    },
+    {
+      "file": "lite/tools/thirdparty-fixture.xml",
       "sha256": "fe4b0662e82afe6d6bda3cad3c8243dd37da522606bd8473b475ac7cbec64978"
     },
     {
-      "file": "full/tools/UpdatePolicyTest.java",
-      "sha256": "91ce2f227d1bf5923d0bc5fc2fd2d39040282dc289d174125470245fc0ba58ed"
+      "file": "lite/tools/UpdatePolicyTest.java",
+      "sha256": "15b7642c86ad45d83db51bdd71068b5f2e6779b847d916557cee2824b316b2da"
     },
     {
-      "file": "lite/AndroidManifest.xml",
-      "sha256": "1412f53cee6dc20a69affc2c3f18d6d672fd4870e256d02f6d15b95c0efacf1f"
+      "file": "lite/usb/start.sh",
+      "sha256": "68e30136aa24713a1f0d8cd824e98062ba638492872a586ba4fbd6670b9a3c97"
+    },
+    {
+      "file": "lite/res/xml/method.xml",
+      "sha256": "9e6e118e886b4c4335d23f63b58272066836c6dacfee1fd47e1d2679c573b2ad"
     },
     {
       "file": "lite/src/com/wm/usbmanager/BasicIme.java",
@@ -134,7 +157,7 @@
     },
     {
       "file": "lite/src/com/wm/usbmanager/BridgeClient.java",
-      "sha256": "69d692ac890dcc33bead589eca05630c7c90fa1602205d5791d48b92a23d21ce"
+      "sha256": "6c37a8fab4b74b40cc0787f18c87501ffae214884ce5401fe8ee53aa015a3380"
     },
     {
       "file": "lite/src/com/wm/usbmanager/GitHubRelease.java",
@@ -146,7 +169,7 @@
     },
     {
       "file": "lite/src/com/wm/usbmanager/MainActivity.java",
-      "sha256": "41cb92326eada954a4e4d68169e2fc2ed11b73a9be30462774a619ed06ebb2e8"
+      "sha256": "6a2a51246b819738750a820a0aa252f351ebbf470254d70a99597986c087691f"
     },
     {
       "file": "lite/src/com/wm/usbmanager/Policy.java",
@@ -154,23 +177,15 @@
     },
     {
       "file": "lite/src/com/wm/usbmanager/RootBridge.java",
-      "sha256": "3573783ffe30db1f8eeeb5236f79daed46b122acc623ef813f6676c742196d24"
+      "sha256": "7df1f4e7e332fd645e2b768979c275a92e40350b801124d2f6faeeb89bfe152d"
+    },
+    {
+      "file": "lite/src/com/wm/usbmanager/SystemInstaller.java",
+      "sha256": "1b084fdf183447134855fa043081a570039f815597459f0879ec073f26aaa426"
     },
     {
       "file": "lite/src/com/wm/usbmanager/UpdatePolicy.java",
-      "sha256": "075ea6fe80ecc3bb4b07194dd9a661515669fe278b734b70a56c9e74c31a6453"
-    },
-    {
-      "file": "lite/res/xml/method.xml",
-      "sha256": "9e6e118e886b4c4335d23f63b58272066836c6dacfee1fd47e1d2679c573b2ad"
-    },
-    {
-      "file": "lite/usb/start.sh",
-      "sha256": "875e7a9e1c2bbfef0aaebc8be653b3fff711f33abc2bfa41c37ea3145320efa5"
-    },
-    {
-      "file": "lite/tools/fixture.xml",
-      "sha256": "b1a3df69754215b9638b7fa83236837899032e8b5f8d9ffbca833cb04dbdd741"
+      "sha256": "6e418e4505ff4d3eb8619533cc4bf522e7f89725f4f1678d90f481ac73581f97"
     },
     {
       "file": "lite/tools/inventory-fixtures/com.car.adbswitch/AndroidManifest.xml",
@@ -197,22 +212,9 @@
       "sha256": "98703b45bfccf7eb360aa909e3607d3703908da86448565e272f145fda679ae3"
     },
     {
-      "file": "lite/tools/PolicyTest.java",
-      "sha256": "d5523932eed1e167db723fd808f5b5ac95e19081bdead852c72c5d3f84c808b2"
-    },
-    {
-      "file": "lite/tools/thirdparty-fixture.xml",
-      "sha256": "fe4b0662e82afe6d6bda3cad3c8243dd37da522606bd8473b475ac7cbec64978"
-    },
-    {
-      "file": "lite/tools/UpdatePolicyTest.java",
-      "sha256": "91ce2f227d1bf5923d0bc5fc2fd2d39040282dc289d174125470245fc0ba58ed"
-    },
-    {
       "file": "usb-bootstrap/yfautorun.sh",
       "sha256": "0e87111dc5f9a7c4774d234bfd4a53a1e26cc4a5f48b7bac118c8de2858b891e"
     }
   ],
-  "privateKeysIncluded": false,
-  "rawVehicleDiagnosticsIncluded": false
+  "vehicleTested": false
 }

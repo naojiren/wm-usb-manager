@@ -15,7 +15,7 @@ import java.io.File;
 import java.util.concurrent.*;
 
 public final class MainActivity extends Activity {
-    private static final int BLUE = Color.rgb(30, 86, 167), INK = Color.rgb(25, 40, 61);
+    private static final int BLUE = Color.rgb(12, 104, 124), INK = Color.rgb(25, 40, 61);
     private static final int WORKING = Color.rgb(167, 76, 0), DONE = Color.rgb(0, 112, 69), ERROR = Color.rgb(184, 40, 40);
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private JSONArray apps = new JSONArray(), apks = new JSONArray();
@@ -26,15 +26,17 @@ public final class MainActivity extends Activity {
     private final Map<String, String> updateStatus = new HashMap<>();
     private TextView state, title, hint, results, current;
     private ProgressBar progressBar;
-    private Switch grants;
+    private Switch grants, systemSwitch;
+    private boolean resident, systemLauncher = true;
     private boolean scanning, ready, busy, grant = true, validationMode;
     private int page;
     private String summary = "", stateText = "向导已打开 · 即将扫描车机软件和 U 盘安装包…";
     @Override public void onCreate(Bundle saved) {
-        super.onCreate(saved); validationMode = getIntent().getBooleanExtra("validation", false); layout();
+        super.onCreate(saved); resident = !getIntent().getBooleanExtra("validation", false) && !getIntent().getBooleanExtra("usb_mode", false); BridgeClient.resident = resident; validationMode = getIntent().getBooleanExtra("validation", false); layout();
         android.util.Log.i("WMUsbManager", "UI_CREATED " + android.os.SystemClock.elapsedRealtime());
         root.postDelayed(() -> refresh(), 250);
     }
+    @Override protected void onNewIntent(android.content.Intent intent) { super.onNewIntent(intent); if (busy) return; setIntent(intent); recreate(); }
     private int d(int n) { return (int)(n * getResources().getDisplayMetrics().density + .5f); }
     private TextView text(String s, int size, boolean bold) {
         TextView t = new TextView(this); t.setText(s); t.setTextSize(size + 6); t.setTextColor(INK);
@@ -42,18 +44,18 @@ public final class MainActivity extends Activity {
     }
     private Button button(String s, View.OnClickListener listener) {
         Button b = new Button(this); b.setText(s); b.setTextSize(26); b.setAllCaps(false);
-        b.setOnClickListener(listener); b.setMinHeight(d(80)); return b;
+        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(222, 237, 240))); b.setTextColor(INK); b.setOnClickListener(listener); b.setMinHeight(d(80)); return b;
     }
     private void layout() {
         root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(d(24), d(16), d(24), d(12));
-        root.setBackgroundColor(Color.rgb(243, 246, 250)); setContentView(root);
+        root.setBackgroundColor(Color.rgb(234, 241, 244)); setContentView(root);
         LinearLayout heading = new LinearLayout(this); heading.setGravity(android.view.Gravity.CENTER_VERTICAL);
         heading.addView(text("威马车机软件向导", 30, true), new LinearLayout.LayoutParams(0, -2, 1));
         heading.addView(button("刷新", v -> refresh()));
         heading.addView(button("退出", v -> { if (!busy || scanning) finish(); })); root.addView(heading);
         state = text(stateText, 17, false); state.setPadding(0, d(8), 0, d(8)); root.addView(state);
         bar = new LinearLayout(this);
-        String[] steps = {"① 删除原厂软件", "② 安装新软件", "恢复已移除软件"};
+        String[] steps = resident ? new String[]{"卸载软件", "联网更新安装"} : new String[]{"① 删除原厂软件", "② 安装新软件", "恢复已移除软件"};
         for (int i = 0; i < steps.length; i++) {
             final int target = i; Button b = button(steps[i], v -> { if (!busy || scanning) { page = target; render(); } });
             bar.addView(b, new LinearLayout.LayoutParams(0, d(88), 1));
@@ -62,6 +64,8 @@ public final class MainActivity extends Activity {
         title = text("", 24, true); title.setPadding(0, d(12), 0, d(4)); 
         hint = text("", 17, false); 
         grants = new Switch(this); grants.setText("自动授予软件声明的运行时权限"); grants.setTextSize(23); grants.setMinHeight(d(80)); grants.setChecked(true);
+        systemSwitch = new Switch(this); systemSwitch.setText("威马桌面安装到系统分区（重启生效）"); systemSwitch.setTextSize(23); systemSwitch.setMinHeight(d(72)); systemSwitch.setChecked(true);
+        systemSwitch.setOnCheckedChangeListener((b, checked) -> systemLauncher = checked);
         grants.setOnCheckedChangeListener((b, checked) -> grant = checked); 
         scroll = new ScrollView(this); scroll.setFillViewport(false);
         list = new LinearLayout(this); list.setOrientation(LinearLayout.VERTICAL); scroll.addView(list);
@@ -77,17 +81,17 @@ public final class MainActivity extends Activity {
     private void status(String message) { stateText = message; state.setText(message); }
     private void refresh() {
         if (busy || isFinishing()) return; scanning = true; setBusy(true); render();
-        status("正在扫描车机软件和 U 盘安装包，请稍候…");
-        current.setText("正在扫描车机软件和 U 盘安装包…"); current.setTextColor(WORKING);
+        status("正在扫描软件，请稍候…");
+        current.setText("正在扫描软件…"); current.setTextColor(WORKING);
         progressBar.setIndeterminate(true); progressBar.setVisibility(View.VISIBLE);
         android.util.Log.i("WMUsbManager", "SCAN_BEGIN " + android.os.SystemClock.elapsedRealtime());
         worker.submit(() -> {
             try {
                 JSONObject data;
-                try { awaitBridge(); data = BridgeClient.call(new JSONObject().put("action", "inventory"), validationMode); }
+                try { if (resident) startResident(); awaitBridge(); data = BridgeClient.call(new JSONObject().put("action", "inventory"), validationMode); }
                 catch (Exception e) {
                     runOnUiThread(() -> { status("正在通过原厂 U 盘入口恢复权限…"); current.setText("正在恢复操作权限，随后继续扫描…"); });
-                    if (validationMode) throw e;
+                    if (validationMode || resident) throw e;
                     RootBridge.run("/system/xbin/su -c 'sh /mnt/udisk/wm_manager/start.sh --resume'", 30);
                     awaitBridge(); data = BridgeClient.call(new JSONObject().put("action", "inventory"), false);
                 }
@@ -106,18 +110,31 @@ public final class MainActivity extends Activity {
                         if (!installation.containsKey(n)) installation.put(n, a.optBoolean("selected"));
                         if (!a.optBoolean("eligible")) installation.put(n, false);
                     }
-                    status(validationMode ? "验证模式 · 原厂软件禁止改动" : ready ? "U 盘已连接 · 权限已就绪 · 请停车后操作" : "权限已就绪；请插入准备好的 U 盘后点刷新");
+                    status(resident ? "车机版 · 卸载与联网更新 · 请停车后操作" : validationMode ? "验证模式 · 原厂软件禁止改动" : ready ? "U 盘已连接 · 权限已就绪 · 请停车后操作" : "权限已就绪；请插入准备好的 U 盘后点刷新");
                     scanning = false; setBusy(false); progressBar.setVisibility(View.GONE);
                     current.setText("扫描完成 · 可选择删除或安装软件"); current.setTextColor(DONE);
                     android.util.Log.i("WMUsbManager", "SCAN_DONE " + android.os.SystemClock.elapsedRealtime()); render();
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
-                    ready = false; status("未连接到提权入口：请把此 U 盘插入副驾驶 USB 接口，等待启动后刷新。");
+                    ready = false; status(resident ? "车机版需要已有 su 授权；可插入 U 盘使用原厂权限入口。" : "请重新插入 U 盘后刷新。");
                     summary = "权限恢复未完成：" + RootBridge.cleanError(e); scanning = false; setBusy(false);
-                    progressBar.setVisibility(View.GONE); current.setText("扫描未完成，请检查 U 盘后刷新"); current.setTextColor(ERROR); render();
+                    progressBar.setVisibility(View.GONE); current.setText(resident ? "扫描未完成，请检查 su 授权后刷新" : "扫描未完成，请检查 U 盘后刷新"); current.setTextColor(ERROR); render();
                 });
             }
+        });
+    }
+    private void startResident() throws Exception {
+        try { if (BridgeClient.call(new JSONObject().put("action", "status"), false, 2000).optBoolean("ok")) return; } catch (Exception ignored) { }
+        String command = "CLASSPATH=" + Policy.quote(getApplicationInfo().sourceDir) + " toybox nohup /system/bin/app_process /system/bin com.wm.usbmanager.RootBridge --resident >/data/local/tmp/wm-wizard-resident.log 2>&1 </dev/null &";
+        RootBridge.run("su -c " + Policy.quote(command), 15);
+    }
+    private void installGuide() {
+        if (busy || !ready) return; setBusy(true); current.setText("正在安装向导到车机…");
+        worker.submit(() -> { String message;
+            try { JSONObject reply = BridgeClient.call(new JSONObject().put("action", "install-guide")); message = reply.optString("message"); }
+            catch (Exception e) { message = RootBridge.cleanError(e); }
+            final String result = message; runOnUiThread(() -> { setBusy(false); current.setText(result); largeDialog(new android.app.AlertDialog.Builder(this).setTitle("安装向导到车机").setMessage(result).setPositiveButton("完成", null).show()); });
         });
     }
     private void awaitBridge() throws Exception {
@@ -160,14 +177,15 @@ public final class MainActivity extends Activity {
     }
     private void render() {
         list.removeAllViews(); footer.removeAllViews(); completed(summary);
-        list.addView(title); list.addView(hint); list.addView(grants);
+        list.addView(title); list.addView(hint); list.addView(grants); list.addView(systemSwitch); systemSwitch.setVisibility(page == 1 ? View.VISIBLE : View.GONE);
         grants.setVisibility(page == 1 ? View.VISIBLE : View.GONE);
         for (int i = 0; i < bar.getChildCount(); i++) {
-            Button b = (Button)bar.getChildAt(i); b.setTextColor(i == page ? BLUE : INK);
+            Button b = (Button)bar.getChildAt(i); b.setTextColor(i == page ? Color.WHITE : INK); b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(i == page ? BLUE : Color.rgb(222,237,240)));
         }
         if (page == 0) {
             title.setText("选择要移除的软件"); title.setTextColor(ERROR);
             hint.setText("原厂百度地图和语音输入法默认勾选，其它项目按需选择。第三方软件单独列出、默认不选。保留数据；原厂软件可从 U 盘恢复，第三方软件用安装包重装。");
+            if (resident) hint.setText("原厂软件从当前用户移除，保留系统 APK。第三方软件默认不选；系统、当前桌面和正在使用的基础服务受保护。此车机版不附恢复包。");
             boolean thirdPartyHeading = false;
             for (int i = 0; i < apps.length(); i++) {
                 JSONObject a = apps.optJSONObject(i);
@@ -183,7 +201,9 @@ public final class MainActivity extends Activity {
         } else if (page == 1) {
             title.setText("选择要安装的软件"); title.setTextColor(BLUE);
             hint.setText("默认仅选 ADB 工具、DiPlay、威马桌面、ES 文件管理器和强制旋转。其它软件按需勾选；不兼容或较旧版本不可选。特殊权限由软件首次使用时提示。");
-            updateCard("wm-launcher", "威马桌面"); updateCard("diplay-wm", "DiPlay");
+            if (!resident) { LinearLayout keep = card(); keep.addView(text("把向导留在车机", 22, true)); keep.addView(text("无需携带 U 盘即可卸载软件、查询并安装桌面与 WePlay 更新。不复制内置软件。", 17, false)); keep.addView(button("安装向导到车机", v -> installGuide())); }
+            updateCard("wm-launcher", "威马桌面"); updateCard("diplay-wm", "WePlay / DiPlay"); if (resident) hint.setText("查询 GitHub 最新发布，点击下载安装。桌面默认写入系统分区，下载缓存仅包含你选择的两款软件。");
+            if (!resident) {
             LinearLayout select = new LinearLayout(this);
             select.addView(button("全选", v -> selectApks(true))); select.addView(button("取消全选", v -> selectApks(false))); list.addView(select);
             select.addView(button("恢复默认", v -> defaultApks()));
@@ -198,6 +218,7 @@ public final class MainActivity extends Activity {
             }
             if (apks.length() == 0) empty(scanning ? "正在扫描 U 盘 apk 文件夹，请稍候…" : "apk 文件夹中没有安装包。把 .apk 文件放到 U 盘根目录的 apk 文件夹，再点刷新。");
             addFooter(button("一键安装已选软件", v -> batch(true)));
+            }
             addFooter(button("返回删除页", v -> { page = 0; render(); }));
         } else {
             title.setText("恢复原厂软件"); hint.setText("调用 U 盘中的原厂备份 APK；不从车辆提取备份，不自动切换导航、桌面或默认输入法。");
@@ -219,8 +240,8 @@ public final class MainActivity extends Activity {
         footer.addView(b, new LinearLayout.LayoutParams(0, d(88), 1));
     }
     private LinearLayout card() {
-        LinearLayout c = new LinearLayout(this); c.setOrientation(LinearLayout.VERTICAL); c.setPadding(d(16), d(10), d(16), d(10));
-        c.setBackgroundColor(Color.WHITE); LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2); p.topMargin = d(8); list.addView(c, p); return c;
+        LinearLayout c = new LinearLayout(this); c.setOrientation(LinearLayout.VERTICAL); c.setPadding(d(20), d(16), d(20), d(16));
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable(); bg.setColor(Color.WHITE); bg.setCornerRadius(d(18)); bg.setStroke(d(1), Color.rgb(215, 227, 232)); c.setBackground(bg); c.setElevation(d(2)); LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2); p.topMargin = d(8); list.addView(c, p); return c;
     }
     private void empty(String s) { LinearLayout c = card(); c.addView(text(s, 20, false)); }
     private void removalRow(JSONObject a, boolean restore) {
@@ -289,7 +310,7 @@ public final class MainActivity extends Activity {
                 boolean itemSuccess = false;
                 try {
                     JSONObject q = new JSONObject().put("action", install ? "install" : "remove");
-                    if (install) q.put("name", a.getString("name")).put("sha256", a.getString("sha256")).put("grant", grantNow);
+                    if (install) q.put("name", a.getString("name")).put("sha256", a.getString("sha256")).put("grant", grantNow).put("systemLauncher", systemLauncher);
                     else q.put("package", a.getString("package"));
                     JSONObject r = BridgeClient.call(q, validationMode);
                     itemSuccess = r.optBoolean("ok"); if (itemSuccess) success++;
@@ -339,16 +360,16 @@ public final class MainActivity extends Activity {
     private void updateCard(String repo, String label) {
         LinearLayout c = card(); c.addView(text(label + " · 在线更新安装包", 22, true));
         JSONObject local = localApk(repo), release = releases.get(repo);
-        c.addView(text(local == null ? "U 盘中尚无此软件安装包" : "本地版本 " + local.optString("version"), 18, false));
+        c.addView(text(local == null ? (resident ? "尚未下载，安装时核对签名与车机版本" : "U 盘中尚无此软件安装包") : "本地版本 " + local.optString("version"), 18, false));
         String message = updateStatus.containsKey(repo) ? updateStatus.get(repo) : "点击查询 GitHub 最新正式版";
         if (release != null && local != null && release.optString("sha256").equals(local.optString("sha256"))) message = "本地已是最新版 · " + release.optString("tag");
         TextView details = text(message, 18, false); details.setTextColor(BLUE); c.addView(details);
         LinearLayout buttons = new LinearLayout(this);
         buttons.addView(button("查询新版", v -> checkUpdate(repo, label)), new LinearLayout.LayoutParams(0, d(88), 1));
-        Button download = button("更新到 U 盘", v -> updateFile(repo, label));
+        Button download = button(resident ? "下载并安装" : "更新到 U 盘", v -> updateFile(repo, label));
         download.setEnabled(release != null && ready && !busy);
         buttons.addView(download, new LinearLayout.LayoutParams(0, d(88), 1)); c.addView(buttons);
-        c.addView(text("需要车机联网。只更新 U 盘文件，安装仍由你勾选操作。", 17, false));
+        c.addView(text(resident ? "联网下载后校验签名和版本，再安装到车机。" : "需要车机联网。更新 U 盘文件后勾选安装。", 17, false));
     }
     private void checkUpdate(String repo, String label) {
         if (busy) return; setBusy(true);
@@ -365,9 +386,9 @@ public final class MainActivity extends Activity {
                     String message = (same ? "本地安装包已是最新版，可重新下载校验。" : "可下载最新正式发布的安装包。")
                         + "\n\n发布版本：" + release.optString("tag") + "\n文件：" + release.optString("file")
                         + "\n大小：" + String.format(Locale.ROOT, "%.1f MB", release.optLong("size") / 1048576.0)
-                        + "\n\n下载完成后替换 U 盘文件，勾选后再安装到车机。\n\n" + notes;
+                        + (resident ? "\n\n确认后下载、校验并安装到车机。\n\n" : "\n\n下载完成后替换 U 盘文件，勾选后再安装到车机。\n\n") + notes;
                     android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(this).setTitle(label + " · 查询结果").setMessage(message).setNegativeButton("关闭", null);
-                    if (ready) dialog.setPositiveButton("更新到 U 盘", (a, b) -> updateFile(repo, label));
+                    if (ready) dialog.setPositiveButton(resident ? "下载并安装" : "更新到 U 盘", (a, b) -> updateFile(repo, label));
                     largeDialog(dialog.show());
                 });
             } catch (Exception e) {
@@ -394,10 +415,10 @@ public final class MainActivity extends Activity {
                 GitHubRelease.download(release, target, (received, total) -> runOnUiThread(() -> {
                     current.setText("正在下载 " + label + " · " + received * 100 / total + "% · " + String.format(Locale.ROOT, "%.1f / %.1f MB", received / 1048576.0, total / 1048576.0)); progressBar.setProgress((int)(received * 100 / total));
                 }));
-                runOnUiThread(() -> { current.setText("正在校验 " + label + " 并写入 U 盘…"); progressBar.setIndeterminate(true); });
+                runOnUiThread(() -> { current.setText("正在校验 " + label + (resident ? " 并安装到车机…" : " 并写入 U 盘…")); progressBar.setIndeterminate(true); });
                 JSONObject q = new JSONObject().put("action", "update-apk").put("repo", repo).put("source", target.getAbsolutePath())
                     .put("name", release.getString("file")).put("size", release.getLong("size")).put("sha256", release.getString("sha256"))
-                    .put("oldName", oldName).put("oldSha256", oldSha);
+                    .put("oldName", oldName).put("oldSha256", oldSha).put("systemLauncher", systemLauncher).put("grant", grant);
                 JSONObject reply = BridgeClient.call(q, validationMode);
                 if (!reply.optBoolean("ok")) throw new Exception(reply.optString("message"));
                 JSONObject refreshed;
@@ -415,8 +436,8 @@ public final class MainActivity extends Activity {
                             if (!a.optBoolean("eligible")) installation.put(n, false);
                         }
                     }
-                    setBusy(false); progressBar.setVisibility(View.GONE); status("U 盘安装包更新完成 · 勾选后可一键安装");
-                    current.setText("✓ 已更新 " + label + " U 盘安装包"); current.setTextColor(DONE); summary = "✓ 已完成 " + label + " · " + reply.optString("version"); render();
+                    setBusy(false); progressBar.setVisibility(View.GONE); status(resident ? "下载和安装处理完成" : "U 盘安装包更新完成 · 勾选后可一键安装");
+                    current.setText("✓ " + label + " · " + reply.optString("message")); current.setTextColor(DONE); summary = "✓ 已完成 " + label + " · " + reply.optString("version"); render();
                     largeDialog(new android.app.AlertDialog.Builder(this).setTitle(label + " · 文件更新完成").setMessage(reply.optString("message") + (inventory.optBoolean("ok") ? "" : "。列表读取失败，请点刷新。" )).setPositiveButton("完成", null).show());
                 });
             } catch (Exception e) {

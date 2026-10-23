@@ -36,6 +36,12 @@ public final class PolicyTest {
         for (String pkg : new String[]{Policy.PACKAGE, "com.wm.launcher", "com.yftech.carservice", "com.android.settings"})
             assertThat(!Policy.removableThirdParty(pkg, false, 10123, false, false));
         assertThat(Policy.quote("a'b;$(id)").equals("'a'\\''b;$(id)'"));
+        assertThat(!Policy.defaultInstall("com.tiger.wm.amapcompanion"));
+        assertThat(!Policy.defaultInstall("com.autonavi.amapauto"));
+        assertThat(Policy.installDescription("com.autonavi.amapauto", "9.1.0.600087").contains("软件包130M，比V7.1增加36M"));
+        assertThat(!Policy.installDescription("com.autonavi.amapauto", "7.1.0").contains("130M"));
+        assertThat(Policy.installDescription("com.tiger.wm.amapcompanion").equals("可选，安装后与高德V9.1配合使用。"));
+        assertThat(Policy.installLabel("com.autonavi.amapauto", "高德", "9.1.0.600087").contains("V9.1"));
         File root = Files.createTempDirectory("wm-policy").toFile();
         File dir = new File(root, "apk"); assertThat(dir.mkdir());
         File apk = new File(dir, "测试 ' 引号.apk"); assertThat(apk.createNewFile());
