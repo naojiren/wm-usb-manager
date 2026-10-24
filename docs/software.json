@@ -13,7 +13,6 @@
     "priority": 0
   },
   {
-    "file": "WePlay-perf32-scan-test-armv7.apk",
     "package": "com.shihab.diplay.wmex5",
     "versionName": "0.2.17-legacy.1-wm-ex5-perf32-scan-test",
     "versionCode": 76,
@@ -21,20 +20,29 @@
     "abis": [
       "armeabi-v7a"
     ],
+    "certificateSha256": [
+      "89a94fd5d7d32fdd26d81c3827c74bb3dc215af91d1fcff0661fd8e1d2c13509"
+    ],
+    "bytes": 12870225,
     "sha256": "4103cf1a6e396f69d4806033c52016eb811571d0c13ed75c80bab2aa8ab89250",
+    "file": "WePlay-perf32-scan-test-armv7.apk",
     "label": "DiPlay",
     "description": "CarPlay 连接与投屏，适用于此威马车机版本。",
     "selected": true,
     "priority": 1
   },
   {
-    "file": "WM-Launcher-0.1.0-wm31-android6.apk",
     "package": "com.wmhome.launcher",
-    "versionName": "0.1.0-wm31",
-    "versionCode": 1031,
+    "versionName": "0.1.0-wm32",
+    "versionCode": 1032,
     "minSdk": 23,
     "abis": [],
-    "sha256": "ca1924bd895f5565efe43f83fff311dcae243c182cbbc3dc7e7f92f9b704a26c",
+    "certificateSha256": [
+      "e2db4c74775d527181c7ca92959fbffaffd273ee2dbff7a143fc8c28687fa1ba"
+    ],
+    "bytes": 1372077,
+    "sha256": "9c69a9058bc848dfc85cbfad60905e6d951df8216f9980e92396ab9bb70b1f72",
+    "file": "WM-Launcher-0.1.0-wm32-android6.apk",
     "label": "威马桌面",
     "description": "威马车机桌面；安装后可自行选择默认桌面。",
     "selected": true,
@@ -74,21 +82,6 @@
     "description": "控制应用横竖屏；首次使用可能需开启相关系统权限。",
     "selected": true,
     "priority": 4
-  },
-  {
-    "file": "3高德_V7.1.0.600067_仪表盘投屏版.apk",
-    "package": "com.autonavi.amapauto",
-    "versionName": "7.1.0.600067_chenmo",
-    "versionCode": 19000197,
-    "minSdk": 14,
-    "abis": [
-      "armeabi-v7a"
-    ],
-    "sha256": "e04f5a80fa1d7569b6638e1a2adf795efef6d6d02cc055f9de8a128fb0115197",
-    "label": "高德地图",
-    "description": "高德导航及仪表投屏版本；投屏效果取决于车机适配。",
-    "selected": false,
-    "priority": 100
   },
   {
     "file": "bilibili车机版__v2.6.0.apk",
@@ -131,21 +124,6 @@
     "sha256": "607fda7dbd06f5e652d7e7f4da6963f0d2053102781a3bd6f0d0c64db2ee6d12",
     "label": "LANShare 局域网快传",
     "description": "同一局域网内传送文件，方便手机与车机互传。",
-    "selected": false,
-    "priority": 100
-  },
-  {
-    "file": "网易云音乐-4.3.1-经典版.apk",
-    "package": "com.netease.cloudmusic",
-    "versionName": "4.3.1",
-    "versionCode": 110,
-    "minSdk": 16,
-    "abis": [
-      "armeabi"
-    ],
-    "sha256": "fb4caf2fb34d6207283511a81cb95c763714bdcb8ad20a805ac3d1f7554dfd39",
-    "label": "网易云音乐经典版",
-    "description": "网易云音乐旧版手机界面，可与车机版按需选择。",
     "selected": false,
     "priority": 100
   },
@@ -215,23 +193,6 @@
     "priority": 100
   },
   {
-    "package": "com.tiger.wm.amapcompanion",
-    "versionName": "1.0.44",
-    "versionCode": 80,
-    "minSdk": 23,
-    "abis": [],
-    "certificateSha256": [
-      "4cc3b11fa04fce6dd8ed62d01d5b12fcb3b071853880ce19ab44027fa1348e60"
-    ],
-    "bytes": 250547,
-    "sha256": "9ab2fbfb8fac21c64aee6fd86b7b066ba2e43e3ad04cfe2ed61a367f35ffd0ca",
-    "file": "WM-Amap-Instrument-Companion-1.0.44.apk",
-    "label": "仪表伴侣 1.0.44",
-    "description": "可选，安装后与高德V9.1配合使用。",
-    "selected": false,
-    "priority": 100
-  },
-  {
     "package": "com.autonavi.amapauto",
     "versionName": "9.1.0.600087",
     "versionCode": 25000001,
@@ -242,11 +203,31 @@
     "certificateSha256": [
       "fb86d2d0bb563e97606e0a862f77d039441b3f4695bd93ed30b1a75a8de3de4b"
     ],
-    "bytes": 137216093,
-    "sha256": "3e4e1ff0a048a4cbc393a958993dc5a6f6cec45fe1262422fd92736ac38fd562",
-    "file": "高德_V9.1.0.600087_后台自动仪表投屏_测试1.apk",
-    "label": "高德地图 V9.1（后台仪表投屏测试版）",
-    "description": "可选。软件包130M，比V7.1增加36M。后台自动仪表投屏测试版；与V7.1为同一软件，请只选择一个版本安装。",
+    "bytes": 135680208,
+    "sha256": "310c7d47ce5c251fcc9e3c8eff313c190071df2c37d64f212d1e56cc01d68ff7",
+    "file": "高德_V9.1_仪表指引后台投屏_单APP测试9.apk",
+    "label": "高德地图 V9.1（仪表指引与后台投屏·单APP测试9）",
+    "description": "可选。约129.4MiB。仪表指引与后台投屏合一，单APP测试9，无需另装仪表伴侣；实际导航与投屏效果需实车确认。",
+    "selected": false,
+    "priority": 100
+  },
+  {
+    "package": "com.tencent.qqmusiccar",
+    "versionName": "3.15.0.3",
+    "versionCode": 3150003,
+    "minSdk": 21,
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a"
+    ],
+    "certificateSha256": [
+      "bf3db8c6cbbf11104eb62fc20e9dfb27b37445d84bdb529241ed498b0044fa1e"
+    ],
+    "bytes": 83028075,
+    "sha256": "d78afae02e8910d7b6003254c414940db0c6efa299eba1d86237bccc0845017d",
+    "file": "QQ音乐车机版.apk",
+    "label": "QQ音乐车机版",
+    "description": "可选。QQ音乐车机界面，在线音乐播放与账号登录；按需安装。",
     "selected": false,
     "priority": 100
   }

@@ -32,7 +32,13 @@ public final class RootBridge {
     private final File journal;
     private final boolean validation;
     private boolean resident;
+    private final File cleanupRoot = new File("/data/local/tmp");
+    private List<CleanupPolicy.Item> cleanupItems = new ArrayList<>();
+    private String cleanupToken = "";
     private final Map<String, String> tokens = new HashMap<>();
+    private final Map<String, ScanPolicy.Selection> selections = new HashMap<>();
+    private final ScanPolicy.Cache<PackageInfo> archiveCache = new ScanPolicy.Cache<>();
+    private final ScanPolicy.Cache<String> digestCache = new ScanPolicy.Cache<>();
 
     RootBridge(Context c, File usb, boolean test) {
         context = c; pm = c.getPackageManager(); root = usb; validation = test;
@@ -92,6 +98,7 @@ public final class RootBridge {
         String action = q.getString("action");
         if (action.equals("status")) return ok("原厂提权通道就绪").put("uid", android.os.Process.myUid()).put("usb", usbReady());
         if (action.equals("inventory")) return inventory();
+        if (action.equals("storage")) return ok("空间已刷新").put("storage", storage());
         if (action.equals("install-guide") && !validation && !resident) {
             if (!usbReady() || !installed(Policy.PACKAGE)) throw new IOException("请从完整 U 盘启动向导后安装");
             File destination = new File("/data/local/wm-software-wizard"); destination.mkdirs();
@@ -104,9 +111,10 @@ public final class RootBridge {
         if (resident && action.equals("restore")) throw new SecurityException("车机版没有原厂恢复包");
         if (action.equals("probe-keyboard") && validation) return probeKeyboard();
         if (!usbReady()) throw new IOException("U 盘已拔出或文件不完整，请重新插入");
+        if (action.equals("cleanup")) return cleanup(q.getString("token"));
         if (action.equals("remove")) return remove(q.getString("package"));
         if (action.equals("restore")) throw new SecurityException("精简版不提供恢复包，请改用完整包恢复原厂软件");
-        if (action.equals("install")) return install(q.getString("name"), q.getString("sha256"), q.optBoolean("grant", true), q.optBoolean("systemLauncher", true));
+        if (action.equals("install")) return install(q.getString("name"), q.optString("token", q.optString("sha256")), q.optBoolean("grant", true), q.optBoolean("systemLauncher", true));
         if (action.equals("update-apk")) return updateApk(q);
         throw new SecurityException("操作未获允许");
     }
@@ -121,7 +129,7 @@ public final class RootBridge {
     }
     private boolean installed(String pkg) {
         // PackageManager flags alone can include a removed system package on OEM firmware.
-        try { return Arrays.asList(run("pm list packages --user 0", 20).split("\\r?\\n")).contains("package:" + pkg); }
+        try { return Policy.packageNames(run("pm list packages --user 0", 20)).contains(pkg); }
         catch (Exception e) { return false; }
     }
     private boolean system(String pkg) {
@@ -129,28 +137,41 @@ public final class RootBridge {
         return p != null && (p.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
     private JSONObject inventory() throws Exception {
+        long started = android.os.SystemClock.elapsedRealtime();
         JSONArray apps = new JSONArray();
+        Map<String, PackageInfo> installedPackages = new HashMap<>();
+        for (PackageInfo item : pm.getInstalledPackages(0)) installedPackages.put(item.packageName, item);
         String listing = run("pm list packages --user 0", 20);
-        Set<String> present = new HashSet<>(Arrays.asList(listing.split("\\r?\\n")));
+        Set<String> present = Policy.packageNames(listing);
         for (String[] e : Policy.OPTIONAL) {
-            boolean active = present.contains("package:" + e[0]);
+            boolean active = present.contains(e[0]);
             apps.put(new JSONObject().put("package", e[0]).put("label", e[1]).put("description", e[2])
-                .put("kind", "factory").put("selected", e[3].equals("1") && active).put("installed", active).put("restorable", false));
+                .put("kind", "factory").put("removable", true).put("selected", e[3].equals("1") && active).put("installed", active).put("restorable", false));
         }
         Set<String> roles = protectedRoles();
-        List<JSONObject> thirdParty = new ArrayList<>();
-        for (PackageInfo p : pm.getInstalledPackages(0)) {
-            if (!present.contains("package:" + p.packageName) || Policy.entry(p.packageName) != null || !removableThirdParty(p, roles)) continue;
-            CharSequence label;
-            try { label = p.applicationInfo.loadLabel(pm); } catch (Exception e) { label = p.packageName; }
-            thirdParty.add(new JSONObject().put("package", p.packageName)
-                .put("label", Policy.installLabel(p.packageName, String.valueOf(label)))
-                .put("kind", "thirdParty").put("selected", false).put("installed", true).put("restorable", false)
-                .put("description", Policy.installDescription(p.packageName) + " 删除后保留数据，找回需用安装包重装。"));
+        List<JSONObject> thirdParty = new ArrayList<>(), protectedApps = new ArrayList<>();
+        for (String pkg : present) {
+            if (Policy.entry(pkg) != null) continue;
+            PackageInfo p = installedPackages.get(pkg);
+            if (p == null) p = packageInfo(pkg, false);
+            boolean removable = p != null && removableThirdParty(p, roles);
+            String label = pkg;
+            if (p != null && p.applicationInfo != null) {
+                try { label = String.valueOf(p.applicationInfo.loadLabel(pm)); } catch (Exception ignored) { }
+            }
+            JSONObject row = new JSONObject().put("package", pkg).put("label", Policy.installLabel(pkg, label))
+                .put("kind", removable ? "thirdParty" : "protected").put("selected", false).put("removable", removable)
+                .put("installed", true).put("restorable", false)
+                .put("description", removable ? Policy.installDescription(pkg) + " 删除后保留数据，找回需用安装包重装。"
+                    : roles.contains(pkg) ? "受保护：当前桌面、输入法、设备管理或正在使用的辅助服务。"
+                    : "受保护：系统、车辆服务或尚未核实用途的预装软件，不开放删除。");
+            (removable ? thirdParty : protectedApps).add(row);
         }
-        Collections.sort(thirdParty, (a, b) -> a.optString("label").compareTo(b.optString("label")));
-        for (JSONObject row : thirdParty) apps.put(row);
-        JSONArray apks = new JSONArray(); tokens.clear();
+        for (List<JSONObject> group : Arrays.asList(thirdParty, protectedApps)) {
+            Collections.sort(group, (a, b) -> a.optString("label").compareTo(b.optString("label")));
+            for (JSONObject row : group) apps.put(row);
+        }
+        JSONArray apks = new JSONArray(); tokens.clear(); selections.clear();
         List<JSONObject> rows = new ArrayList<>();
         File dir = new File(root, "apk");
         File[] files = dir.listFiles();
@@ -163,16 +184,20 @@ public final class RootBridge {
                     .put("description", "按软件声明的权限安装；不自动设为默认应用。");
                 try {
                     f = Policy.apk(root, f.getName());
-                    PackageInfo p = archive(f);
+                    PackageInfo p = archiveCache.get(f, candidate -> scanArchive(candidate));
                     String problem = compatible(f, p);
-                    boolean protectedApp = protectedArchive(p);
+                    PackageInfo current = installedPackages.get(p.packageName);
+                    boolean systemApp = current != null && current.applicationInfo != null && (current.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                    boolean protectedApp = !p.packageName.equals("com.wmhome.launcher") && Policy.protectedInstall(p.packageName, systemApp);
                     if (protectedApp) problem = "系统或车辆程序受保护，禁止覆盖";
-                    String digest = sha(f); tokens.put(f.getName(), digest);
+                    ScanPolicy.Selection selected = new ScanPolicy.Selection(f, p.packageName, p.versionCode);
+                    tokens.put(f.getName(), selected.token); selections.put(f.getName(), selected);
+                    String digest = digestCache.peek(f);
                     CharSequence label;
-                    try { label = p.applicationInfo.loadLabel(pm); } catch (Exception e) { label = p.packageName; }
-                    PackageInfo current = packageInfo(p.packageName, false);
+                    String known = Policy.installLabel(p.packageName, p.packageName);
+                    try { label = known.equals(p.packageName) ? p.applicationInfo.loadLabel(pm) : known; } catch (Exception e) { label = p.packageName; }
                     row.put("package", p.packageName).put("label", Policy.installLabel(p.packageName, String.valueOf(label))).put("version", p.versionName)
-                        .put("code", p.versionCode).put("sha256", digest).put("eligible", problem.length() == 0)
+                        .put("code", p.versionCode).put("token", selected.token).put("sha256", digest == null ? "" : digest).put("eligible", problem.length() == 0)
                         .put("reason", problem).put("existing", current != null ? current.versionName : "")
                         .put("priority", Policy.installRank(p.packageName))
                         .put("description", Policy.installDescription(p.packageName));
@@ -198,7 +223,94 @@ public final class RootBridge {
             apks.put(row);
         }
         return ok("读取完成").put("edition", "lite").put("apps", apps).put("apks", apks).put("usb", usbReady())
+            .put("storage", storage()).put("cleanup", scanCleanup()).put("installedCount", present.size())
+            .put("scanMillis", android.os.SystemClock.elapsedRealtime() - started).put("apkHashedBytesDuringScan", 0)
             .put("apkDirectory", dir.getAbsolutePath()).put("keyboard", run("settings get secure default_input_method", 15));
+    }
+    private PackageInfo scanArchive(File file) throws Exception {
+        PackageInfo p = pm.getPackageArchiveInfo(file.getPath(), 0);
+        if (p == null || p.applicationInfo == null) throw new IOException("APK 格式无效");
+        p.applicationInfo.sourceDir = file.getPath(); p.applicationInfo.publicSourceDir = file.getPath();
+        return p;
+    }
+    private ScanPolicy.Selection requireSelected(String name, File file, String token) throws Exception {
+        if (!token.equals(tokens.get(name))) throw new SecurityException("选择凭据已失效，请刷新后重选");
+        ScanPolicy.Selection selected = selections.get(name);
+        if (selected != null) selected.require(file, token);
+        else if (!UpdatePolicy.sha(token)) throw new SecurityException("安装选择凭据无效");
+        return selected;
+    }
+    private JSONObject storage() throws Exception {
+        JSONObject result = new JSONObject();
+        try {
+            android.os.StatFs stat = new android.os.StatFs("/data");
+            StoragePolicy.Snapshot snapshot = StoragePolicy.read(stat.getTotalBytes(), stat.getAvailableBytes(),
+                () -> run("settings get global sys_storage_threshold_percentage; settings get global sys_storage_threshold_max_bytes", 10));
+            result.put("total", snapshot.total).put("available", snapshot.available).put("reserveKnown", snapshot.reserveKnown);
+            if (snapshot.reserveKnown) result.put("reserve", snapshot.reserve).put("aboveReserve", snapshot.aboveReserve);
+        } catch (Exception e) {
+            result.put("error", "空间读取暂不可用：" + cleanError(e));
+        }
+        return result;
+    }
+    private JSONObject scanCleanup() throws Exception {
+        cleanupToken = UUID.randomUUID().toString(); cleanupItems = new ArrayList<>();
+        JSONObject result = new JSONObject().put("token", cleanupToken);
+        try { cleanupItems = CleanupPolicy.scan(cleanupRoot, System.currentTimeMillis()); }
+        catch (IOException e) { return result.put("status", "unavailable").put("error", e.getMessage()); }
+        long bytes = 0; JSONArray names = new JSONArray();
+        for (CleanupPolicy.Item item : cleanupItems) { bytes += item.size; names.put(item.name); }
+        long backupBytes = 0, unknownBytes = 0;
+        File[] top = cleanupRoot.listFiles();
+        if (top != null) for (File file : top) {
+            if (!file.isFile() || !file.getAbsoluteFile().equals(file.getCanonicalFile())) continue;
+            if (CleanupPolicy.backup(file.getName())) backupBytes += file.length();
+            else if (!CleanupPolicy.recognized(file.getName())) unknownBytes += file.length();
+        }
+        return result.put("status", "ready").put("count", cleanupItems.size()).put("bytes", bytes).put("files", names)
+            .put("backupBytes", backupBytes).put("unknownBytes", unknownBytes);
+    }
+    private Set<String> inUseTemporaryFiles() throws IOException {
+        Set<String> paths = new HashSet<>();
+        File[] processes = new File("/proc").listFiles();
+        if (processes == null) throw new IOException("无法核对正在使用的文件，已取消清理");
+        for (File process : processes) {
+            if (!process.getName().matches("[0-9]+")) continue;
+            File[] descriptors = new File(process, "fd").listFiles();
+            if (descriptors == null && process.exists()) throw new IOException("无法核对进程文件，已取消清理");
+            if (descriptors != null) for (File descriptor : descriptors) {
+                try { paths.add(descriptor.getCanonicalPath()); } catch (IOException ignored) { }
+            }
+            for (String name : new String[]{"maps", "cmdline"}) {
+                try (BufferedReader in = new BufferedReader(new FileReader(new File(process, name)))) {
+                    for (String line; (line = in.readLine()) != null;) {
+                        for (CleanupPolicy.Item item : cleanupItems) {
+                            String path = new File(cleanupRoot, item.name).getPath();
+                            if (line.contains(path)) paths.add(path);
+                        }
+                    }
+                } catch (IOException e) { if (process.exists()) throw new IOException("无法核对进程引用，已取消清理", e); }
+            }
+        }
+        return paths;
+    }
+    private JSONObject cleanup(String token) throws Exception {
+        if (validation) throw new SecurityException("验证模式禁止清理真实临时文件");
+        if (cleanupToken.isEmpty() || !cleanupToken.equals(token)) throw new SecurityException("清理清单已变化，请刷新后重选");
+        cleanupToken = "";
+        Set<String> inUse = inUseTemporaryFiles();
+        long bytes = 0; int deleted = 0, skipped = 0; StringBuilder detail = new StringBuilder();
+        for (CleanupPolicy.Item item : cleanupItems) {
+            File file = new File(cleanupRoot, item.name);
+            if (!CleanupPolicy.unchanged(cleanupRoot, item, System.currentTimeMillis()) || inUse.contains(file.getPath())) { skipped++; continue; }
+            android.system.StructStat st = android.system.Os.lstat(file.getPath());
+            if (!android.system.OsConstants.S_ISREG(st.st_mode) || st.st_nlink != 1 || !file.delete()) { skipped++; continue; }
+            deleted++; bytes += item.size; detail.append(item.name).append('\n');
+        }
+        String message = "已清理 " + deleted + " 个临时文件，删除文件合计约 " + String.format(Locale.ROOT, "%.1f", bytes / 1048576.0) + " MiB；跳过 " + skipped + " 个变化或使用中的文件。备份、应用数据及向导工作目录保留。";
+        journal("cleanup", "debug-temp", true, message + "\n" + detail);
+        cleanupItems.clear();
+        return ok(message).put("storage", storage()).put("deleted", deleted).put("skipped", skipped);
     }
     private PackageInfo archive(File f) throws Exception {
         PackageInfo p = pm.getPackageArchiveInfo(f.getAbsolutePath(), PackageManager.GET_PERMISSIONS | PackageManager.GET_SIGNATURES);
@@ -321,7 +433,10 @@ public final class RootBridge {
     }
     private JSONObject install(String name, String expected, boolean grant, boolean systemLauncher) throws Exception {
         File file = Policy.apk(root, name);
-        if (!expected.equals(tokens.get(name)) || !expected.equals(sha(file))) throw new SecurityException("APK 已变化，请刷新列表后重新选择");
+        ScanPolicy.Selection selected = requireSelected(name, file, expected);
+        String expectedDigest = sha(file);
+        if (selected != null) selected.require(file, expected);
+        else if (!expected.equals(expectedDigest)) throw new SecurityException("下载文件已变化，请重新更新");
         // Copy and verify private staging file: USB replacement cannot alter the package mid-install.
         File stageDir = new File("/data/local/tmp/wm-usb-manager/stage"); stageDir.mkdirs();
         stageDir.getParentFile().setExecutable(true, false); stageDir.setExecutable(true, false);
@@ -331,8 +446,9 @@ public final class RootBridge {
                 byte[] b = new byte[65536]; for (int n; (n = in.read(b)) > 0;) out.write(b, 0, n);
             }
             staged.setReadable(true, false);
-            if (!expected.equals(sha(staged))) throw new IOException("U 盘文件读取不完整，已停止安装");
+            if (!expectedDigest.equals(sha(staged))) throw new IOException("U 盘文件读取不完整，已停止安装");
             PackageInfo p = archive(staged);
+            if (selected != null) selected.requireIdentity(p.packageName, p.versionCode);
             if (protectedArchive(p) && !(validation && p.packageName.equals("com.wm.usbfixture")))
                 throw new SecurityException("禁止覆盖系统或车辆程序");
             if (validation && !p.packageName.equals("com.wm.usbfixture")) throw new SecurityException("验证模式仅允许验证软件");
@@ -346,6 +462,9 @@ public final class RootBridge {
                 output += "\n" + run("pm enable --user 0 " + Policy.quote(p.packageName), 20);
                 now = packageInfo(p.packageName, false);
                 success = now != null && now.applicationInfo != null && now.applicationInfo.enabled;
+            }
+            if (success) {
+                try { if (selected != null) selected.require(file, expected); digestCache.put(file, expectedDigest); } catch (Exception ignored) { }
             }
             journal("install", p.packageName, success, output);
             if (!success) throw new IOException("安装或恢复启用失败：" + output);
@@ -367,11 +486,13 @@ public final class RootBridge {
         File source = new File(q.getString("source")).getCanonicalFile();
         if (!cache.equals(source.getParentFile()) || !source.getName().matches("download-[a-f0-9-]{36}\\.apk") || !source.isFile())
             throw new SecurityException("更新文件必须来自向导的下载缓存");
-        String oldName = q.optString("oldName"), oldSha = q.optString("oldSha256"); File old = null;
+        String oldName = q.optString("oldName"), oldToken = q.optString("oldToken", q.optString("oldSha256")), oldSha = ""; File old = null;
         if (!oldName.isEmpty()) {
             old = Policy.apk(root, oldName);
-            if (!UpdatePolicy.sha(oldSha) || !oldSha.equals(tokens.get(oldName)) || !oldSha.equals(sha(old)))
-                throw new IOException("本地安装包已变化，请刷新后重新更新");
+            ScanPolicy.Selection previous = requireSelected(oldName, old, oldToken);
+            oldSha = sha(old);
+            if (previous != null) previous.require(old, oldToken);
+            else if (!oldToken.equals(oldSha)) throw new IOException("本地安装包已变化，请刷新后重新更新");
         }
         File directory = new File(root, "apk");
         if (!directory.isDirectory() && !directory.mkdirs()) throw new IOException("无法创建 U 盘 apk 文件夹");
@@ -414,6 +535,7 @@ public final class RootBridge {
             android.system.Os.rename(staged.getAbsolutePath(), target.getAbsolutePath());
             boolean retainedOld = old != null && !old.equals(target) && !old.delete();
             tokens.remove(oldName); tokens.put(name, expected);
+            selections.remove(oldName); selections.remove(name); digestCache.put(target, expected);
             String message = "已更新 U 盘安装包；勾选后可安装到车机" + (retainedOld ? "。旧文件未能删除，请按需手动清理" : "");
             try { journal("update-apk", pkg, true, name + " " + expected); } catch (IOException ignored) { }
             if (resident) return install(name, expected, q.optBoolean("grant", true), q.optBoolean("systemLauncher", true)).put("version", fresh.versionName);

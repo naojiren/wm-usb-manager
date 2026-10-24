@@ -37,6 +37,15 @@ public final class PolicyTest {
         for (String pkg : new String[]{Policy.PACKAGE, "com.wm.launcher", "com.yftech.carservice", "com.android.settings"})
             assertThat(!Policy.removableThirdParty(pkg, false, 10123, false, false));
         assertThat(Policy.quote("a'b;$(id)").equals("'a'\\''b;$(id)'"));
+        assertThat(Policy.packageNames("package:android\r\npackage:com.ivi.radio\r\n").contains("com.ivi.radio"));
+        assertThat(Policy.packageNames("package:android\npackage:com.ivi.radio\npackage:com.ivi.radio").size() == 2);
+        rejected(() -> Policy.packageNames("Error: package service unavailable"));
+        rejected(() -> Policy.packageNames(""));
+        Policy.requireRemovable("com.ivi.radio"); Policy.requireRemovable("com.ivi.radiowidget");
+        assertThat(Policy.entry("com.yftech.radioservice") == null);
+        assertThat(Policy.entry("com.ivi.radio")[3].equals("0"));
+        assertThat(!Policy.defaultInstall("com.tencent.qqmusiccar"));
+        assertThat(Policy.installLabel("com.tencent.qqmusiccar", "unknown").equals("QQ音乐车机版"));
         File root = Files.createTempDirectory("wm-policy").toFile();
         File dir = new File(root, "apk"); assertThat(dir.mkdir());
         File apk = new File(dir, "测试 ' 引号.apk"); assertThat(apk.createNewFile());

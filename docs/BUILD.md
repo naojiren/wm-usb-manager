@@ -16,6 +16,10 @@ bash tools/build.sh lite
 
 tools/check.sh 执行完整版和精简版的删除、安装路径及在线更新策略断言。Linux 环境用于验证符号链接边界；它不会连接车辆或删除车辆软件。
 
-Android Manifest 的最低/目标 API 仍为 23，应用 versionCode 为 3。完整版 versionName 为 1.4.0，精简版为 1.4.0-lite。编译使用新版平台不改变运行目标。
+Android Manifest 最低/目标API仍为23。1.4.2两版 versionCode均为5，versionName为1.4.2 / 1.4.2-lite；编译平台不改变运行目标。tools/check.sh同时执行清理范围及符号链接边界检查，共263项断言。
 
-1.4.1 完整版 versionCode 为 4；精简版仍为 1.4.0-lite / 3。本次只构建 full。
+1.4.3 两版 versionCode 均为6；tools/check.sh共291项断言，包括Settings拒绝访问时继续保留容量信息的回归检查。
+
+1.4.4：两版versionCode均为7；tools/check.sh共337项断言，新增ScanPolicy缓存和选择凭据检查，清理检查覆盖新近/未来时间及固定中转路径。
+
+1.4.5：两版versionCode均为8；345项策略检查。高德测试9使用包名、版本和文件名联合识别说明，不把任意同版本高德都标成测试9。

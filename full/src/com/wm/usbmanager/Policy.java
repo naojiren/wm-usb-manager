@@ -19,8 +19,19 @@ public final class Policy {
         {"com.ivi.wechatwidget", "微信桌面卡片", "移除原厂桌面的微信卡片。", "0"},
         {"com.ivi.mijia", "原厂米家", "移除米家智能家居入口。", "0"},
         {"com.ivi.musicplayer", "原厂音乐", "移除原厂音乐播放器；请先安装替代播放器。", "0"},
-        {"com.ivi.musicwidget", "音乐桌面卡片", "移除原厂桌面的音乐卡片。", "0"}
+        {"com.ivi.musicwidget", "音乐桌面卡片", "移除原厂桌面的音乐卡片。", "0"},
+        {"com.ivi.radio", "原厂收音机", "移除收音机应用，原厂收音机入口及播放功能将不可用；底层收音机和音频服务保留。", "0"},
+        {"com.ivi.radiowidget", "收音机桌面卡片", "移除原厂桌面的收音机卡片，底层收音机服务保留。", "0"}
     };
+    public static java.util.Set<String> packageNames(String output) {
+        java.util.Set<String> names = new java.util.TreeSet<>();
+        for (String line : output.replace("\r", "").split("\n")) {
+            line = line.trim();
+            if (line.startsWith("package:") && line.substring(8).matches("[A-Za-z0-9_.]+")) names.add(line.substring(8));
+        }
+        if (!names.contains("android")) throw new SecurityException("系统软件清单读取不完整，请刷新重试");
+        return names;
+    }
     public static String[] entry(String pkg) {
         for (String[] e : OPTIONAL) if (e[0].equals(pkg)) return e;
         return null;
@@ -48,16 +59,29 @@ public final class Policy {
     public static boolean removableThirdParty(String pkg, boolean system, int uid, boolean persistent, boolean role) {
         return !system && uid >= 10000 && !persistent && !role && !protectedInstall(pkg, false);
     }
+    private static boolean singleAmapTest9(String pkg, String version, String file) {
+        return pkg.equals("com.autonavi.amapauto") && "9.1.0.600087".equals(version)
+            && file.equals("高德_V9.1_仪表指引后台投屏_单APP测试9.apk");
+    }
+    public static String installLabel(String pkg, String fallback, String version, String file) {
+        return singleAmapTest9(pkg, version, file) ? "高德地图 V9.1（仪表指引与后台投屏·单APP测试9）" : installLabel(pkg, fallback, version);
+    }
+    public static String installDescription(String pkg, String version, String file) {
+        return singleAmapTest9(pkg, version, file)
+            ? "可选。约129.4MiB。仪表指引与后台投屏合一，单APP测试9，无需另装仪表伴侣；实际导航与投屏效果需实车确认。"
+            : installDescription(pkg, version);
+    }
     public static String installLabel(String pkg, String fallback, String version) {
         if (pkg.equals("com.autonavi.amapauto") && "9.1.0.600087".equals(version)) return "高德地图 V9.1（后台仪表投屏测试版）";
         return installLabel(pkg, fallback);
     }
     public static String installDescription(String pkg, String version) {
         if (pkg.equals("com.autonavi.amapauto") && "9.1.0.600087".equals(version))
-            return "可选。软件包130M，比V7.1增加36M。后台自动仪表投屏测试版；与V7.1为同一软件，请只选择一个版本安装。";
+            return "可选。高德V9.1导航与投屏版本，功能以所选安装包为准；安装时还需中转和解压空间。";
         return installDescription(pkg);
     }
     public static String installLabel(String pkg, String fallback) {
+        if (pkg.equals("com.tencent.qqmusiccar")) return "QQ音乐车机版";
         if (pkg.equals("com.tiger.wm.amapcompanion")) return "仪表伴侣 1.0.44";
         if (pkg.equals("com.car.adbswitch")) return "ADB 工具";
         if (pkg.equals("com.shihab.diplay.wmex5")) return "DiPlay";
@@ -76,6 +100,7 @@ public final class Policy {
         return fallback;
     }
     public static String installDescription(String pkg) {
+        if (pkg.equals("com.tencent.qqmusiccar")) return "可选。QQ音乐车机界面，在线音乐播放与账号登录；按需安装。";
         if (pkg.equals("com.tiger.wm.amapcompanion")) return "可选，安装后与高德V9.1配合使用。";
         if (pkg.equals("com.car.adbswitch")) return "车机 ADB 开关，便于连接调试和管理软件。";
         if (pkg.equals("com.shihab.diplay.wmex5")) return "CarPlay 连接与投屏，适用于此威马车机版本。";

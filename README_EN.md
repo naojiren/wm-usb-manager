@@ -1,13 +1,18 @@
-# WM Head Unit Software Wizard 1.4.0
+# WM Head Unit Software Wizard 1.4.5
 
-Full bundle 1.4.1 adds optional Amap V9.1 and Instrument Companion 1.0.44. Both are unchecked by default; Amap V7.1 is retained as an alternative. Lite remains 1.4.0.
+## Amap V9.1 experimental notice
+
+**Amap V9.1 is still being tested. If it does not work, use V7.1 from the previous full release.**
+
+[Previous 1.4.1 release](https://github.com/naojiren/wm-usb-manager/releases/tag/v1.4.1-wm31-perf32) · [Full bundle containing V7.1](https://github.com/naojiren/wm-usb-manager/releases/download/v1.4.1-wm31-perf32/WM-USB-Manager-1.4.1-wm31-perf32-full.zip). A downgrade from V9.1 may require uninstalling the current Amap app first. Preserve any needed navigation data before changing major versions.
+
 
 [简体中文](README.md)
 
-Includes WM Launcher wm31 and WePlay perf32 scan-protection test build. USB mode offers removal, APK installation and (full edition) factory restoration. Launcher installation defaults to the system partition and requires an existing root channel, writable storage and a matching signing certificate. Restart manually after successful system installation.
+The full bundle uses WM Launcher wm32 and the latest WePlay conversation build, perf32 scan-protection test (unchanged from the previous bundle). Both old Amap APKs (V7.1 and V9.1 test 2) and WM-Amap-Instrument-Companion 1.0.44 are removed. They are replaced by the supplied Amap V9.1 single-app test 9, combining instrument guidance and background projection, and QQ Music Car 3.15.0.3. Both new apps are optional and unchecked. Full contains 14 installation APKs and 13 factory recovery APKs. Lite retains only the original five default APKs and also uses wm32.
 
-Step two includes Install wizard on head unit. The USB bootstrap already installs the wizard; this action verifies installation and creates its local workspace without copying bundled applications or backups. Opening the wizard from the app launcher provides only removal and online update/install for WM Launcher and WePlay. The standalone wizard APK includes no bundled applications.
+Extract into the USB root and reinsert to replace the wizard and root worker. Overlay extraction does not delete obsolete files: remove the old USB APKs listed in 删除旧文件清单.txt, including the two old Amap packages, old companion, and wm31 launcher. Other user-added APKs can remain. Replacing USB files does not uninstall applications already installed on the vehicle.
 
-Resident mode requires existing su authorization, including after reboot. Without su, use the factory USB entry. It checks official GitHub releases, hashes, package identity, architecture, signatures and version codes, and rejects downgrades. The locally bundled perf32 test build may be newer than the latest public release.
+VersionCode is 8 for both variants. Existing lightweight scanning, optional cleanup, storage display, five default selections, and system-partition launcher installation remain. Cleanup preserves backups and application data; zero cleanup candidates does not mean zero available storage.
 
-Both editions compile and pass signature verification and 199 policy assertions. No ADB or vehicle connection was made. System partition writes, resident privileges and visual appearance need physical validation. See docs/BUILD.md for building.
+Both wizard variants compile, match the prior signing identity and pass 345 policy assertions. Launcher wm32, Amap test 9 and QQ Music pass Android 6 signature verification; WePlay matches the prior verified APK exactly. Bundle CRCs, manifest hashes, app counts, defaults and unchanged payload bytes are checked. Vehicle installation, navigation, projection and music playback were not tested in this packaging task. QQ Music was read from the supplied local H drive; no USB synchronization was performed. See [BUILD](docs/BUILD.md).

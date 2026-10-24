@@ -20,8 +20,19 @@ public final class Policy {
         {"com.ivi.wechatwidget", "微信桌面卡片", "移除原厂桌面的微信卡片。", "0"},
         {"com.ivi.mijia", "原厂米家", "移除米家智能家居入口。", "0"},
         {"com.ivi.musicplayer", "原厂音乐", "移除原厂音乐播放器；请先安装替代播放器。", "0"},
-        {"com.ivi.musicwidget", "音乐桌面卡片", "移除原厂桌面的音乐卡片。", "0"}
+        {"com.ivi.musicwidget", "音乐桌面卡片", "移除原厂桌面的音乐卡片。", "0"},
+        {"com.ivi.radio", "原厂收音机", "移除收音机应用，原厂收音机入口及播放功能将不可用；底层收音机和音频服务保留。", "0"},
+        {"com.ivi.radiowidget", "收音机桌面卡片", "移除原厂桌面的收音机卡片，底层收音机服务保留。", "0"}
     };
+    public static java.util.Set<String> packageNames(String output) {
+        java.util.Set<String> names = new java.util.TreeSet<>();
+        for (String line : output.replace("\r", "").split("\n")) {
+            line = line.trim();
+            if (line.startsWith("package:") && line.substring(8).matches("[A-Za-z0-9_.]+")) names.add(line.substring(8));
+        }
+        if (!names.contains("android")) throw new SecurityException("系统软件清单读取不完整，请刷新重试");
+        return names;
+    }
     public static String[] entry(String pkg) {
         for (String[] e : OPTIONAL) if (e[0].equals(pkg)) return e;
         return null;
@@ -50,6 +61,7 @@ public final class Policy {
         return !system && uid >= 10000 && !persistent && !role && !protectedInstall(pkg, false);
     }
     public static String installLabel(String pkg, String fallback) {
+        if (pkg.equals("com.tencent.qqmusiccar")) return "QQ音乐车机版";
         if (pkg.equals("com.car.adbswitch")) return "ADB 工具";
         if (pkg.equals("com.shihab.diplay.wmex5")) return "DiPlay";
         if (pkg.equals("com.wmhome.launcher")) return "威马桌面";
@@ -67,6 +79,7 @@ public final class Policy {
         return fallback;
     }
     public static String installDescription(String pkg) {
+        if (pkg.equals("com.tencent.qqmusiccar")) return "可选。QQ音乐车机界面，在线音乐播放与账号登录；按需安装。";
         if (pkg.equals("com.car.adbswitch")) return "车机 ADB 开关，便于连接调试和管理软件。";
         if (pkg.equals("com.shihab.diplay.wmex5")) return "CarPlay 连接与投屏，适用于此威马车机版本。";
         if (pkg.equals("com.wmhome.launcher")) return "威马车机桌面；安装后可自行选择默认桌面。";
