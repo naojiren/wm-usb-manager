@@ -55,6 +55,9 @@ public final class PolicyTest {
         assertThat(!Policy.installLabel("other.package", "Other", "9.1.0.600087", "高德_V9.1_仪表指引后台投屏_单APP测试9.apk").contains("单APP测试9"));
         assertThat(!Policy.defaultInstall("com.tencent.qqmusiccar"));
         assertThat(Policy.installLabel("com.tencent.qqmusiccar", "unknown").equals("QQ音乐车机版"));
+        assertThat(Policy.installLabel("com.autonavi.amapauto", "高德", "9.1.0.600087", "高德_V9.1_仪表指引后台投屏_测试11.apk").contains("测试11"));
+        assertThat(Policy.installDescription("com.autonavi.amapauto", "9.1.0.600087", "高德_V9.1_仪表指引后台投屏_测试11.apk").contains("无需另装仪表伴侣"));
+        assertThat(!Policy.installLabel("com.autonavi.amapauto", "高德", "9.1.0.600087", "other.apk").contains("测试11"));
         File root = Files.createTempDirectory("wm-policy").toFile();
         File dir = new File(root, "apk"); assertThat(dir.mkdir());
         File apk = new File(dir, "测试 ' 引号.apk"); assertThat(apk.createNewFile());

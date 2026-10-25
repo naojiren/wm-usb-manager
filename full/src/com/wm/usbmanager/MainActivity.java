@@ -326,6 +326,9 @@ public final class MainActivity extends Activity {
         if (!allowed) desc += "\n不可安装：" + a.optString("reason");
         if (!a.optString("existing").isEmpty()) desc += " · 已安装 " + a.optString("existing");
         c.addView(text(desc, 17, false));
+        if (AmapInstall.applies(a.optString("package"))) {
+            TextView notice = text(AmapInstall.NOTICE, 18, true); notice.setTextColor(ERROR); c.addView(notice);
+        }
         c.addView(text(name + " · " + String.format(java.util.Locale.ROOT, "%.1f MB", a.optLong("size") / 1048576.0), 14, false));
     }
     private void selectApks(boolean checked) {
@@ -367,7 +370,7 @@ public final class MainActivity extends Activity {
         worker.submit(() -> {
             int success = 0; StringBuilder log = new StringBuilder(), completedLog = new StringBuilder();
             for (int i = 0; i < jobs.size(); i++) {
-                JSONObject a = jobs.get(i); final String progress = (install ? "正在安装 " : "正在删除 ") + (i + 1) + "/" + jobs.size() + " · " + a.optString("label");
+                JSONObject a = jobs.get(i); final String progress = (install && AmapInstall.applies(a.optString("package")) ? "正在校验、清除高德应用数据并安装 " : install ? "正在安装 " : "正在删除 ") + (i + 1) + "/" + jobs.size() + " · " + a.optString("label");
                 runOnUiThread(() -> { status(progress); current.setText(progress); current.setTextColor(WORKING); });
                 boolean itemSuccess = false;
                 try {
@@ -375,7 +378,7 @@ public final class MainActivity extends Activity {
                     if (install) q.put("name", a.getString("name")).put("token", a.getString("token")).put("grant", grantNow).put("systemLauncher", systemLauncher);
                     else if (a.optString("kind").equals("cleanup")) q.put("action", "cleanup").put("token", a.getString("token"));
                     else q.put("package", a.getString("package"));
-                    JSONObject r = BridgeClient.call(q, validationMode);
+                    JSONObject r = BridgeClient.call(q, validationMode, install && AmapInstall.applies(a.optString("package")) ? 300000 : 180000);
                     itemSuccess = r.optBoolean("ok"); if (itemSuccess) success++;
                     log.append(r.optBoolean("ok") ? "✓ " : "✗ ").append(a.optString("label")).append("：").append(r.optString("message")).append('\n');
                 } catch (Exception e) { log.append("✗ ").append(a.optString("label")).append("：").append(RootBridge.cleanError(e)).append('\n'); }
@@ -419,21 +422,29 @@ public final class MainActivity extends Activity {
         String pkg = UpdatePolicy.pkg(repo); JSONObject best = null;
         for (int i = 0; i < apks.length(); i++) {
             JSONObject a = apks.optJSONObject(i);
-            if (pkg.equals(a.optString("package")) && (best == null || a.optInt("code") > best.optInt("code"))) best = a;
+            if (pkg.equals(a.optString("package")) && UpdatePolicy.preferLocal(repo, a.optString("name"), a.optInt("code"), best == null ? null : best.optString("name"), best == null ? 0 : best.optInt("code"))) best = a;
         }
         return best;
+    }
+    private boolean canUpdate(String repo, JSONObject release, JSONObject local) {
+        return release != null && UpdatePolicy.canUpdate(repo, release.optString("file"), local == null ? null : local.optString("name"),
+            local != null && release.optString("sha256").equals(local.optString("sha256")));
+    }
+    private String updateComparison(String repo, JSONObject release, JSONObject local) {
+        return UpdatePolicy.comparison(repo, release.optString("file"), local == null ? null : local.optString("name"),
+            local != null && release.optString("sha256").equals(local.optString("sha256")));
     }
     private void updateCard(String repo, String label) {
         LinearLayout c = card(); c.addView(text(label + " · 在线更新安装包", 22, true));
         JSONObject local = localApk(repo), release = releases.get(repo);
-        c.addView(text(local == null ? (resident ? "尚未下载，安装时核对签名与车机版本" : "U 盘中尚无此软件安装包") : "本地版本 " + local.optString("version"), 18, false));
-        String message = updateStatus.containsKey(repo) ? updateStatus.get(repo) : "点击查询 GitHub 最新正式版";
-        if (release != null && local != null && release.optString("sha256").equals(local.optString("sha256"))) message = "本地已是最新版 · " + release.optString("tag");
+        c.addView(text(local == null ? (resident ? "尚未下载，安装时核对签名与车机版本" : "U 盘中尚无此软件安装包") : "本地版本 " + local.optString("version") + "\n" + local.optString("name"), 18, false));
+        String message = updateStatus.containsKey(repo) ? updateStatus.get(repo) : (repo.equals("diplay-wm") ? "按文件名 perf 数字查询已发布版本（含测试版）" : "点击查询 GitHub 最新正式版");
+        if (release != null) message = updateComparison(repo, release, local);
         TextView details = text(message, 18, false); details.setTextColor(BLUE); c.addView(details);
         LinearLayout buttons = new LinearLayout(this);
         buttons.addView(button("查询新版", v -> checkUpdate(repo, label)), new LinearLayout.LayoutParams(0, d(88), 1));
         Button download = button(resident ? "下载并安装" : "更新到 U 盘", v -> updateFile(repo, label));
-        download.setEnabled(release != null && ready && !busy);
+        download.setEnabled(canUpdate(repo, release, local) && ready && !busy);
         buttons.addView(download, new LinearLayout.LayoutParams(0, d(88), 1)); c.addView(buttons);
         c.addView(text(resident ? "联网下载后校验签名和版本，再安装到车机。" : "需要车机联网。更新 U 盘文件后勾选安装。", 17, false));
     }
@@ -447,14 +458,14 @@ public final class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     releases.put(repo, release); updateStatus.put(repo, "最新发布 " + release.optString("tag"));
                     setBusy(false); progressBar.setVisibility(View.GONE); current.setText("查询完成 · " + label + " " + release.optString("tag")); current.setTextColor(DONE); render();
-                    JSONObject local = localApk(repo); boolean same = local != null && release.optString("sha256").equals(local.optString("sha256"));
+                    JSONObject local = localApk(repo); boolean available = canUpdate(repo, release, local);
                     String notes = release.optString("notes"); if (notes.length() > 1200) notes = notes.substring(0, 1200) + "…";
-                    String message = (same ? "本地安装包已是最新版，可重新下载校验。" : "可下载最新正式发布的安装包。")
+                    String message = updateComparison(repo, release, local)
                         + "\n\n发布版本：" + release.optString("tag") + "\n文件：" + release.optString("file")
                         + "\n大小：" + String.format(Locale.ROOT, "%.1f MB", release.optLong("size") / 1048576.0)
                         + (resident ? "\n\n确认后下载、校验并安装到车机。\n\n" : "\n\n下载完成后替换 U 盘文件，勾选后再安装到车机。\n\n") + notes;
                     android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(this).setTitle(label + " · 查询结果").setMessage(message).setNegativeButton("关闭", null);
-                    if (ready) dialog.setPositiveButton(resident ? "下载并安装" : "更新到 U 盘", (a, b) -> updateFile(repo, label));
+                    if (ready && available) dialog.setPositiveButton(resident ? "下载并安装" : "更新到 U 盘", (a, b) -> updateFile(repo, label));
                     largeDialog(dialog.show());
                 });
             } catch (Exception e) {
@@ -469,6 +480,7 @@ public final class MainActivity extends Activity {
     private void updateFile(String repo, String label) {
         JSONObject release = releases.get(repo); if (!ready || busy || release == null) return;
         JSONObject old = localApk(repo); final String oldName = old == null ? "" : old.optString("name"), oldToken = old == null ? "" : old.optString("token");
+        if (!canUpdate(repo, release, old)) { current.setText(updateComparison(repo, release, old)); return; }
         final boolean selected = old == null || Boolean.TRUE.equals(installation.get(oldName));
         File directory = new File(getCacheDir(), "updates");
         if (!directory.isDirectory() && !directory.mkdirs()) { current.setText("无法创建下载缓存，请检查车机存储空间"); current.setTextColor(ERROR); return; }

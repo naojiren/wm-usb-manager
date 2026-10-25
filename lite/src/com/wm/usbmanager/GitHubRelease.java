@@ -15,7 +15,7 @@ public final class GitHubRelease {
             HttpURLConnection c = (HttpURLConnection)new URL(address).openConnection();
             ((javax.net.ssl.HttpsURLConnection)c).setSSLSocketFactory(GitHubTrust.sockets());
             c.setConnectTimeout(15000); c.setReadTimeout(25000); c.setInstanceFollowRedirects(false); c.setUseCaches(false);
-            c.setRequestProperty("User-Agent", "WM-USB-Manager/1.3.0");
+            c.setRequestProperty("User-Agent", "WM-USB-Manager/1.4.6");
             c.setRequestProperty("Accept", json ? "application/vnd.github+json" : "application/octet-stream");
             c.setRequestProperty("Accept-Encoding", "identity");
             int code;
@@ -38,7 +38,7 @@ public final class GitHubRelease {
         try (InputStream in = c.getInputStream(); ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
             byte[] b = new byte[8192];
             for (int n; (n = in.read(b)) > 0;) {
-                if (bytes.size() + n > 1048576) throw new IOException("GitHub 发布说明过大");
+                if (bytes.size() + n > (json ? 5 * 1048576 : 1048576)) throw new IOException("GitHub 发布说明过大");
                 bytes.write(b, 0, n);
             }
             return new String(bytes.toByteArray(), "UTF-8");
@@ -46,16 +46,28 @@ public final class GitHubRelease {
     }
     public static JSONObject latest(String repo) throws Exception {
         String pkg = UpdatePolicy.pkg(repo);
-        JSONObject release = new JSONObject(small("https://api.github.com/repos/naojiren/" + repo + "/releases/latest", true));
-        if (release.optBoolean("draft") || release.optBoolean("prerelease")) throw new IOException("尚无正式发布版本");
-        JSONArray assets = release.getJSONArray("assets"); JSONObject chosen = null; int rank = -1; String sumsUrl = "";
-        for (int i = 0; i < assets.length(); i++) {
-            JSONObject a = assets.getJSONObject(i); String name = a.optString("name");
-            if (name.equals("SHA256SUMS.txt") && UpdatePolicy.assetUrl(repo, a.optString("browser_download_url"))) sumsUrl = a.getString("browser_download_url");
-            int r = UpdatePolicy.assetRank(repo, name);
-            if (r > rank && UpdatePolicy.size(a.optLong("size")) && "uploaded".equals(a.optString("state")) && UpdatePolicy.assetUrl(repo, a.optString("browser_download_url"))) { chosen = a; rank = r; }
+        boolean numbered = repo.equals("diplay-wm");
+        String address = "https://api.github.com/repos/naojiren/" + repo + "/releases";
+        JSONArray releases = numbered ? new JSONArray(small(address + "?per_page=100", true))
+            : new JSONArray().put(new JSONObject(small(address + "/latest", true)));
+        JSONObject release = null, chosen = null;
+        for (int j = 0; j < releases.length(); j++) {
+            JSONObject candidate = releases.getJSONObject(j);
+            if (candidate.optBoolean("draft") || (!numbered && candidate.optBoolean("prerelease"))) continue;
+            JSONArray assets = candidate.getJSONArray("assets");
+            for (int i = 0; i < assets.length(); i++) {
+                JSONObject a = assets.getJSONObject(i); String name = a.optString("name");
+                if (UpdatePolicy.betterAsset(repo, name, chosen == null ? null : chosen.optString("name"))
+                        && UpdatePolicy.size(a.optLong("size")) && "uploaded".equals(a.optString("state"))
+                        && UpdatePolicy.assetUrl(repo, a.optString("browser_download_url"))) { chosen = a; release = candidate; }
+            }
         }
-        if (chosen == null) throw new IOException("最新发布中没有适合本车机的安卓 6 / ARMv7 安装包");
+        if (chosen == null) throw new IOException("已发布版本中没有适合本车机的安卓 6 / ARMv7 安装包" + (numbered ? "（文件名需含 perf 数字）" : ""));
+        String sumsUrl = ""; JSONArray assets = release.getJSONArray("assets");
+        for (int i = 0; i < assets.length(); i++) {
+            JSONObject a = assets.getJSONObject(i);
+            if (a.optString("name").equals("SHA256SUMS.txt") && UpdatePolicy.assetUrl(repo, a.optString("browser_download_url"))) sumsUrl = a.getString("browser_download_url");
+        }
         String checksum = chosen.optString("digest");
         checksum = checksum.startsWith("sha256:") ? checksum.substring(7).toLowerCase(Locale.ROOT) : "";
         if (!UpdatePolicy.sha(checksum) && !sumsUrl.isEmpty()) {

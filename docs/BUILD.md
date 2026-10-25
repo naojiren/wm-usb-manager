@@ -23,3 +23,5 @@ Android Manifest 最低/目标API仍为23。1.4.2两版 versionCode均为5，ver
 1.4.4：两版versionCode均为7；tools/check.sh共337项断言，新增ScanPolicy缓存和选择凭据检查，清理检查覆盖新近/未来时间及固定中转路径。
 
 1.4.5：两版versionCode均为8；345项策略检查。高德测试9使用包名、版本和文件名联合识别说明，不把任意同版本高德都标成测试9。
+
+1.4.6：两版versionCode均为9；444项检查（full 228、lite 216），包含AmapInstallTest与数字perf比较。使用原签名密钥，无需重签附带APK。

@@ -1,6 +1,9 @@
 package com.wm.usbmanager;
 
 import java.net.URI;
+import java.math.BigInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Locale;
 
 /** Only the two user-selected public repositories can supply managed updates. */
@@ -28,6 +31,61 @@ public final class UpdatePolicy {
         if (!n.startsWith("diplay-wm-ex5-") && !n.startsWith("weplay-")) return -1;
         if (n.endsWith("-armv7.apk") || n.endsWith("-armeabi-v7a.apk")) return 10;
         return -1;
+    }
+    private static final Pattern PERF = Pattern.compile("(?:^|[-_.])perf([0-9]+)(?=[-_.]|$)", Pattern.CASE_INSENSITIVE);
+    public static BigInteger perf(String name) {
+        if (name == null) return null;
+        Matcher m = PERF.matcher(name);
+        if (!m.find()) return null;
+        BigInteger value = new BigInteger(m.group(1));
+        return m.find() ? null : value;
+    }
+    /** Null means that a file has no unambiguous perf number. */
+    public static Integer comparePerf(String candidate, String current) {
+        BigInteger a = perf(candidate), b = perf(current);
+        return a == null || b == null ? null : a.compareTo(b);
+    }
+    public static boolean betterAsset(String repo, String candidate, String current) {
+        int rank = assetRank(repo, candidate);
+        if (rank < 0 || (repo.equals("diplay-wm") && perf(candidate) == null)) return false;
+        if (current == null) return true;
+        if (repo.equals("diplay-wm")) {
+            Integer order = comparePerf(candidate, current);
+            if (order != null && order != 0) return order > 0;
+        }
+        return rank > assetRank(repo, current);
+    }
+    public static boolean preferLocal(String repo, String candidate, int code, String current, int currentCode) {
+        if (current == null) return true;
+        if (repo.equals("diplay-wm")) {
+            BigInteger a = perf(candidate), b = perf(current);
+            if (a != null && b == null) return true;
+            if (a == null && b != null) return false;
+            if (a != null) return a.compareTo(b) > 0;
+        }
+        return code > currentCode;
+    }
+    public static boolean canUpdate(String repo, String remote, String local, boolean sameDigest) {
+        if (sameDigest) return false;
+        if (repo.equals("diplay-wm")) {
+            if (perf(remote) == null) return false;
+            Integer order = comparePerf(remote, local);
+            return order == null || order > 0;
+        }
+        return true;
+    }
+    public static String comparison(String repo, String remote, String local, boolean sameDigest) {
+        if (repo.equals("diplay-wm")) {
+            Integer order = comparePerf(remote, local);
+            if (order != null) {
+                if (order < 0) return "本地 perf" + perf(local) + " 高于线上 perf" + perf(remote) + "，无需更新";
+                if (order == 0) return "本地与线上均为 perf" + perf(remote) + "，无需更新";
+                return "发现新版 perf" + perf(remote) + "（本地 perf" + perf(local) + "）";
+            }
+            if (local != null && !local.isEmpty()) return "本地文件名未标注 perf 数字，无法比较；线上 perf" + perf(remote);
+            return "可下载 perf" + perf(remote);
+        }
+        return sameDigest ? "本地安装包已与发布包一致，无需更新" : "可下载最新正式发布的安装包";
     }
     public static boolean sha(String value) { return value != null && value.matches("[a-f0-9]{64}"); }
     public static boolean size(long value) { return value > 0 && value <= MAX_APK; }

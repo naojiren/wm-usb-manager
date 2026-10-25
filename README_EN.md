@@ -1,18 +1,15 @@
-# WM Head Unit Software Wizard 1.4.5
-
-## Amap V9.1 experimental notice
-
-**Amap V9.1 is still being tested. If it does not work, use V7.1 from the previous full release.**
-
-[Previous 1.4.1 release](https://github.com/naojiren/wm-usb-manager/releases/tag/v1.4.1-wm31-perf32) · [Full bundle containing V7.1](https://github.com/naojiren/wm-usb-manager/releases/download/v1.4.1-wm31-perf32/WM-USB-Manager-1.4.1-wm31-perf32-full.zip). A downgrade from V9.1 may require uninstalling the current Amap app first. Preserve any needed navigation data before changing major versions.
-
+# WM Head Unit Software Wizard 1.4.6
 
 [简体中文](README.md)
 
-The full bundle uses WM Launcher wm32 and the latest WePlay conversation build, perf32 scan-protection test (unchanged from the previous bundle). Both old Amap APKs (V7.1 and V9.1 test 2) and WM-Amap-Instrument-Companion 1.0.44 are removed. They are replaced by the supplied Amap V9.1 single-app test 9, combining instrument guidance and background projection, and QQ Music Car 3.15.0.3. Both new apps are optional and unchecked. Full contains 14 installation APKs and 13 factory recovery APKs. Lite retains only the original five default APKs and also uses wm32.
+The bundled Amap test 11 is byte-for-byte identical to the supplied APK (SHA-256 c8fb3f9b543cacdff1b59d2bead0e7add7a5f63c7f1fe7a44d498e378d38b2e0).
 
-Extract into the USB root and reinsert to replace the wizard and root worker. Overlay extraction does not delete obsolete files: remove the old USB APKs listed in 删除旧文件清单.txt, including the two old Amap packages, old companion, and wm31 launcher. Other user-added APKs can remain. Replacing USB files does not uninstall applications already installed on the vehicle.
+Selecting Amap in step 2 now clears its Android application data after APK validation and before installation. Favorites, accounts, settings and offline maps may be lost: save needed content first. Unselected apps and other packages are unaffected. A failed clear stops that installation; a fresh installation without an existing Amap record skips clearing. The card, progress and result explain the operation. Clearing data does not resolve a signing-key conflict: an incompatible old Amap package must be fully uninstalled separately; this wizard does not automatically uninstall it.
 
-VersionCode is 8 for both variants. Existing lightweight scanning, optional cleanup, storage display, five default selections, and system-partition launcher installation remain. Cleanup preserves backups and application data; zero cleanup candidates does not mean zero available storage.
+WePlay/DiPlay updates compare the numeric perf suffix in APK filenames. perf32 is newer than perf22, and perf100 is newer than perf99. Equal perf numbers do not trigger an upgrade, and lower online perf numbers cannot replace higher local ones. The checker examines up to 100 published releases, including prereleases and excluding drafts, for compatible ARMv7 assets. Missing local perf numbers produce an explicit unknown-version message. Launcher updates retain the existing official release source. Identity, signature, hash, architecture and Android compatibility checks remain.
 
-Both wizard variants compile, match the prior signing identity and pass 345 policy assertions. Launcher wm32, Amap test 9 and QQ Music pass Android 6 signature verification; WePlay matches the prior verified APK exactly. Bundle CRCs, manifest hashes, app counts, defaults and unchanged payload bytes are checked. Vehicle installation, navigation, projection and music playback were not tested in this packaging task. QQ Music was read from the supplied local H drive; no USB synchronization was performed. See [BUILD](docs/BUILD.md).
+Full contains 14 installation APKs and 13 factory recovery APKs; Lite contains the five existing default APKs and no factory backups. All bundled application APKs match the previous bundles. Both wizards use versionCode 9 and retain the previous signing identity. Exit the old wizard, extract the full USB contents and reinsert the USB to restart the updated worker. Overlay extraction does not delete obsolete APKs; follow the bundled deletion list.
+
+Amap V9.1 remains experimental. If it is unusable, use V7.1 from the previous 1.4.1 full bundle; changing versions may require uninstalling V9.1 and saving required data first.
+
+Both variants compile, verify for Android 6/API23, and pass 444 checks. ZIP CRCs, payload hashes, app counts, factory recovery packages and unchanged bootstrap files are verified. The build involved no USB synchronization, vehicle ADB connection or vehicle runtime testing. This public delivery contains verified bundles and source. See [BUILD](docs/BUILD.md).

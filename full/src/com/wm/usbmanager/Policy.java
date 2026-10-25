@@ -64,9 +64,11 @@ public final class Policy {
             && file.equals("高德_V9.1_仪表指引后台投屏_单APP测试9.apk");
     }
     public static String installLabel(String pkg, String fallback, String version, String file) {
+        if (pkg.equals("com.autonavi.amapauto") && "9.1.0.600087".equals(version) && file.equals("高德_V9.1_仪表指引后台投屏_测试11.apk")) return "高德地图 V9.1（仪表指引与后台投屏·测试11）";
         return singleAmapTest9(pkg, version, file) ? "高德地图 V9.1（仪表指引与后台投屏·单APP测试9）" : installLabel(pkg, fallback, version);
     }
     public static String installDescription(String pkg, String version, String file) {
+        if (pkg.equals("com.autonavi.amapauto") && "9.1.0.600087".equals(version) && file.equals("高德_V9.1_仪表指引后台投屏_测试11.apk")) return "可选。仪表指引与后台投屏测试11，无需另装仪表伴侣；V9.1仍在测试中。";
         return singleAmapTest9(pkg, version, file)
             ? "可选。约129.4MiB。仪表指引与后台投屏合一，单APP测试9，无需另装仪表伴侣；实际导航与投屏效果需实车确认。"
             : installDescription(pkg, version);

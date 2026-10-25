@@ -203,11 +203,11 @@
     "certificateSha256": [
       "fb86d2d0bb563e97606e0a862f77d039441b3f4695bd93ed30b1a75a8de3de4b"
     ],
-    "bytes": 135680208,
-    "sha256": "310c7d47ce5c251fcc9e3c8eff313c190071df2c37d64f212d1e56cc01d68ff7",
-    "file": "高德_V9.1_仪表指引后台投屏_单APP测试9.apk",
-    "label": "高德地图 V9.1（仪表指引与后台投屏·单APP测试9）",
-    "description": "可选。约129.4MiB。仪表指引与后台投屏合一，单APP测试9，无需另装仪表伴侣；实际导航与投屏效果需实车确认。",
+    "bytes": 135684304,
+    "sha256": "c8fb3f9b543cacdff1b59d2bead0e7add7a5f63c7f1fe7a44d498e378d38b2e0",
+    "file": "高德_V9.1_仪表指引后台投屏_测试11.apk",
+    "label": "高德地图 V9.1（仪表指引与后台投屏·测试11）",
+    "description": "可选。高德V9.1仪表指引与后台投屏测试11，无需另装仪表伴侣。安装前自动清除高德应用数据，收藏、账号、设置及离线地图可能丢失。V9.1仍在测试中。",
     "selected": false,
     "priority": 100
   },

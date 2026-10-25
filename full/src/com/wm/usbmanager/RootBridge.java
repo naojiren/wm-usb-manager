@@ -519,6 +519,19 @@ public final class RootBridge {
             if (resident && !p.packageName.equals("com.wmhome.launcher") && !p.packageName.equals("com.shihab.diplay.wmex5")) throw new SecurityException("车机版仅安装桌面和 WePlay");
             String problem = compatible(staged, p);
             if (!problem.isEmpty()) throw new IOException(problem);
+            String preparation = "";
+            if (AmapInstall.applies(p.packageName)) {
+                boolean present;
+                try { pm.getPackageInfo(AmapInstall.PACKAGE, INCLUDE_REMOVED); present = true; }
+                catch (PackageManager.NameNotFoundException absent) { present = false; }
+                try {
+                    preparation = AmapInstall.beforeInstall(p.packageName, present, command -> run(command, 90));
+                    journal("clear-amap-data", p.packageName, true, preparation);
+                } catch (Exception e) {
+                    journal("clear-amap-data", p.packageName, false, cleanError(e));
+                    throw e;
+                }
+            }
             String output = run("pm install -r " + (grant ? "-g " : "") + Policy.quote(staged.getAbsolutePath()), 150);
             PackageInfo now = packageInfo(p.packageName, false);
             boolean success = output.contains("Success") && installed(p.packageName) && now != null && now.versionCode == p.versionCode;
@@ -530,14 +543,14 @@ public final class RootBridge {
             if (success) {
                 try { if (selected != null) selected.require(file, expected); digestCache.put(file, expectedDigest); } catch (Exception ignored) { }
             }
-            journal("install", p.packageName, success, output);
-            if (!success) throw new IOException("安装或恢复启用失败：" + output);
+            journal("install", p.packageName, success, preparation + "\n" + output);
+            if (!success) throw new IOException(AmapInstall.failure(p.packageName, preparation, output));
             if (systemLauncher && p.packageName.equals("com.wmhome.launcher")) {
                 try { SystemInstaller.install(staged, pm); }
                 catch (Exception e) { throw new IOException("普通安装已完成，但系统分区写入失败：" + cleanError(e)); }
                 return ok("桌面已写入系统分区并校验；请手动重启车机后生效");
             }
-            return ok("安装成功，软件已启用" + (grant ? "，已授予软件声明的运行时权限" : "，权限按 Android 默认处理"));
+            return ok((preparation.isEmpty() ? "" : preparation + "；") + "安装成功，软件已启用" + (grant ? "，已授予软件声明的运行时权限" : "，权限按 Android 默认处理"));
         } finally { staged.delete(); }
     }
     private JSONObject updateApk(JSONObject q) throws Exception {
@@ -554,6 +567,7 @@ public final class RootBridge {
         if (!oldName.isEmpty()) {
             old = Policy.apk(root, oldName);
             ScanPolicy.Selection previous = requireSelected(oldName, old, oldToken);
+            if (!UpdatePolicy.canUpdate(repo, name, oldName, false)) throw new IOException("本地 perf 版本不低于发布版本，无需更新");
             oldSha = sha(old);
             if (previous != null) previous.require(old, oldToken);
             else if (!oldToken.equals(oldSha)) throw new IOException("本地安装包已变化，请刷新后重新更新");
