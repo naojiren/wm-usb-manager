@@ -461,7 +461,12 @@ public final class RootBridge {
                 try { pm.getPackageInfo(AmapInstall.PACKAGE, INCLUDE_REMOVED); present = true; }
                 catch (PackageManager.NameNotFoundException absent) { present = false; }
                 try {
-                    preparation = AmapInstall.beforeInstall(p.packageName, present, command -> run(command, 90));
+                    PackageInfo previous = present ? packageInfo(AmapInstall.PACKAGE, true) : null;
+                    boolean active = previous != null && previous.applicationInfo != null
+                        && previous.applicationInfo.sourceDir != null && new File(previous.applicationInfo.sourceDir).isFile()
+                        && installed(AmapInstall.PACKAGE);
+                    preparation = AmapInstall.beforeInstall(p.packageName, present, active,
+                        command -> run(command, 90), () -> RetainedAmapData.clearForOwner());
                     journal("clear-amap-data", p.packageName, true, preparation);
                 } catch (Exception e) {
                     journal("clear-amap-data", p.packageName, false, cleanError(e));

@@ -46,7 +46,17 @@ if [ "$task_match" != 1 ]; then
     chmod 644 "$task_state/bootstrap.apk"
     task_install_result=$(pm install -r -g "$task_state/bootstrap.apk" 2>&1)
     echo "$task_install_result"
-    case "$task_install_result" in *Success*) ;; *) echo "ERROR: manager install failed"; exit 1;; esac
+    case "$task_install_result" in
+        *Success*) ;;
+        *INSTALL_FAILED_VERSION_DOWNGRADE*)
+            # The vehicle was explicitly updated; keep its newer signed wizard.
+            if [ -z "$task_installed" ] || [ ! -f "$task_installed" ]; then
+                echo "ERROR: newer installed manager is unavailable"; exit 1
+            fi
+            echo "USB manager is older; using the newer installed manager"
+            ;;
+        *) echo "ERROR: manager install failed"; exit 1;;
+    esac
     rm -f "$task_state/bootstrap.apk"
 fi
 task_installed=$(pm path "$task_pkg" 2>/dev/null)

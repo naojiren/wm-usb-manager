@@ -1,15 +1,11 @@
-# WM Head Unit Software Wizard 1.4.6
+# WM Head Unit Software Wizard: in-place 1.4.6 release fix
 
-[简体中文](README.md)
+The existing 1.4.6 release URL and asset names are retained. Bundled wizards are 1.4.7 / 1.4.7-lite, versionCode 10, with the previous signing identity.
 
-The bundled Amap test 11 is byte-for-byte identical to the supplied APK (SHA-256 c8fb3f9b543cacdff1b59d2bead0e7add7a5f63c7f1fe7a44d498e378d38b2e0).
+Fixes installation when Amap was uninstalled with data retained: data-only packages use the Android package service for user 0 and require a successful system callback before installation. Installed packages retain the original clear-data flow; no prior record skips clearing. Failures/timeouts stop the operation. No direct directory deletion or automatic uninstall is added. The USB startup script now keeps a newer installed wizard when Android rejects a downgrade from an older USB copy, and restarts the matching worker.
 
-Selecting Amap in step 2 now clears its Android application data after APK validation and before installation. Favorites, accounts, settings and offline maps may be lost: save needed content first. Unselected apps and other packages are unaffected. A failed clear stops that installation; a fresh installation without an existing Amap record skips clearing. The card, progress and result explain the operation. Clearing data does not resolve a signing-key conflict: an incompatible old Amap package must be fully uninstalled separately; this wizard does not automatically uninstall it.
+Exit the old wizard, extract all USB contents and reinsert through the factory entry. Clearing Amap data may remove favorites, account state, settings and offline maps: save required content first. Data clearing cannot resolve signing-key conflicts. Full retains 14 installation APKs and 13 factory recovery APKs; Lite retains five default APKs. All bundled application APKs, including Amap test 11, Launcher wm32 and WePlay perf32, are unchanged. Numeric perf update comparison remains.
 
-WePlay/DiPlay updates compare the numeric perf suffix in APK filenames. perf32 is newer than perf22, and perf100 is newer than perf99. Equal perf numbers do not trigger an upgrade, and lower online perf numbers cannot replace higher local ones. The checker examines up to 100 published releases, including prereleases and excluding drafts, for compatible ARMv7 assets. Missing local perf numbers produce an explicit unknown-version message. Launcher updates retain the existing official release source. Identity, signature, hash, architecture and Android compatibility checks remain.
+Both editions compile, pass API23 signing verification and 462 policy checks; three local Binder callback checks passed on the vehicle. The same 1.4.7 wizard and worker were deployed using ADB, after which the user confirmed the Amap installation succeeded. This does not establish navigation, projection or compatibility with every vehicle. CRCs, payload hashes and matching source are verified.
 
-Full contains 14 installation APKs and 13 factory recovery APKs; Lite contains the five existing default APKs and no factory backups. All bundled application APKs match the previous bundles. Both wizards use versionCode 9 and retain the previous signing identity. Exit the old wizard, extract the full USB contents and reinsert the USB to restart the updated worker. Overlay extraction does not delete obsolete APKs; follow the bundled deletion list.
-
-Amap V9.1 remains experimental. If it is unusable, use V7.1 from the previous 1.4.1 full bundle; changing versions may require uninstalling V9.1 and saving required data first.
-
-Both variants compile, verify for Android 6/API23, and pass 444 checks. ZIP CRCs, payload hashes, app counts, factory recovery packages and unchanged bootstrap files are verified. The build involved no USB synchronization, vehicle ADB connection or vehicle runtime testing. This public delivery contains verified bundles and source. See [BUILD](docs/BUILD.md).
+Use the attached source.zip or the main branch for this fix. The original 1.4.6 Git tag is retained as its release baseline. Amap V9.1 remains experimental; V7.1 is available in the older 1.4.1 full release.

@@ -15,7 +15,7 @@ public final class GitHubRelease {
             HttpURLConnection c = (HttpURLConnection)new URL(address).openConnection();
             ((javax.net.ssl.HttpsURLConnection)c).setSSLSocketFactory(GitHubTrust.sockets());
             c.setConnectTimeout(15000); c.setReadTimeout(25000); c.setInstanceFollowRedirects(false); c.setUseCaches(false);
-            c.setRequestProperty("User-Agent", "WM-USB-Manager/1.4.6");
+            c.setRequestProperty("User-Agent", "WM-USB-Manager/1.4.7");
             c.setRequestProperty("Accept", json ? "application/vnd.github+json" : "application/octet-stream");
             c.setRequestProperty("Accept-Encoding", "identity");
             int code;

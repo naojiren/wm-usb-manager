@@ -25,3 +25,5 @@ Android Manifest 最低/目标API仍为23。1.4.2两版 versionCode均为5，ver
 1.4.5：两版versionCode均为8；345项策略检查。高德测试9使用包名、版本和文件名联合识别说明，不把任意同版本高德都标成测试9。
 
 1.4.6：两版versionCode均为9；444项检查（full 228、lite 216），包含AmapInstallTest与数字perf比较。使用原签名密钥，无需重签附带APK。
+
+1.4.6 Release原位修复：内置向导1.4.7 / 1.4.7-lite，versionCode 10；462项策略检查，另有3项车机Binder回调协议检查。源码以随附source.zip及main分支为准。
