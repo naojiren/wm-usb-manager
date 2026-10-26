@@ -18,7 +18,7 @@ public final class BasicIme extends InputMethodService {
         panel.setPadding(12, 8, 12, 8);
         panel.setBackgroundColor(Color.rgb(224, 231, 237));
         TextView title = new TextView(this);
-        title.setText("向导备用键盘 · 英文 / 数字"); title.setTextSize(22);
+        title.setText("管家备用键盘 · 英文 / 数字"); title.setTextSize(22);
         panel.addView(title);
         for (String line : new String[]{"1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm.,"}) {
             LinearLayout row = new LinearLayout(this);

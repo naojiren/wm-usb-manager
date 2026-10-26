@@ -46,6 +46,18 @@ public final class PolicyTest {
         assertThat(Policy.entry("com.ivi.radio")[3].equals("0"));
         assertThat(!Policy.defaultInstall("com.tencent.qqmusiccar"));
         assertThat(Policy.installLabel("com.tencent.qqmusiccar", "unknown").equals("QQ音乐车机版"));
+        Policy.requireRemovable("com.yftech.btphone");
+        assertThat(Policy.entry("com.yftech.btphone")[3].equals("1"));
+        assertThat(Policy.removalWarning("com.yftech.btphone").contains("CarPlay"));
+        assertThat(Policy.removalWarning("com.ivi.musicplayer").isEmpty());
+        for (String protectedPkg : new String[]{"com.yftech.btphon", "com.yftech.btservice", "com.nforetek.bt", "com.yftech.carservice"}) rejected(() -> Policy.requireRemovable(protectedPkg));
+        assertThat(Policy.showRestore("com.ivi.musicplayer", true, true, true));
+        assertThat(Policy.showRestore("com.yftech.btphone", true, true, true));
+        assertThat(!Policy.showRestore("com.yftech.btphone", false, false, false));
+        assertThat(!Policy.showRestore("com.ivi.map", true, true, true));
+        assertThat(Policy.showRestore("com.ivi.map", true, false, false));
+        assertThat(Policy.restoreDescription("com.yftech.btphone").contains("蓝牙电话"));
+        assertThat(Policy.restoreDescription("com.ivi.musicplayer").contains("音乐"));
         File root = Files.createTempDirectory("wm-policy").toFile();
         File dir = new File(root, "apk"); assertThat(dir.mkdir());
         File apk = new File(dir, "测试 ' 引号.apk"); assertThat(apk.createNewFile());

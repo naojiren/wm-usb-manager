@@ -19,6 +19,7 @@ public final class Policy {
         {"com.ivi.wechat", "原厂微信", "移除原厂微信应用及其入口。", "0"},
         {"com.ivi.wechatwidget", "微信桌面卡片", "移除原厂桌面的微信卡片。", "0"},
         {"com.ivi.mijia", "原厂米家", "移除米家智能家居入口。", "0"},
+        {"com.yftech.btphone", "BTPhone 蓝牙电话", "移除蓝牙电话界面，蓝牙通话与拨号入口可能不可用；保留底层蓝牙服务，可从完整包恢复。", "1"},
         {"com.ivi.musicplayer", "原厂音乐", "移除原厂音乐播放器；请先安装替代播放器。", "0"},
         {"com.ivi.musicwidget", "音乐桌面卡片", "移除原厂桌面的音乐卡片。", "0"},
         {"com.ivi.radio", "原厂收音机", "移除收音机应用，原厂收音机入口及播放功能将不可用；底层收音机和音频服务保留。", "0"},
@@ -36,6 +37,20 @@ public final class Policy {
     public static String[] entry(String pkg) {
         for (String[] e : OPTIONAL) if (e[0].equals(pkg)) return e;
         return null;
+    }
+    public static String removalWarning(String pkg) {
+        return "com.yftech.btphone".equals(pkg) ? "蓝牙电话与 CarPlay 的蓝牙音频冲突" : "";
+    }
+    public static boolean restoreShortcut(String pkg) {
+        return "com.ivi.musicplayer".equals(pkg) || "com.yftech.btphone".equals(pkg);
+    }
+    public static boolean showRestore(String pkg, boolean known, boolean installed, boolean enabled) {
+        return known && (restoreShortcut(pkg) || !installed || !enabled);
+    }
+    public static String restoreDescription(String pkg) {
+        if ("com.yftech.btphone".equals(pkg)) return "恢复原厂蓝牙电话及通话/拨号入口；可能重新出现与CarPlay蓝牙音频的冲突。";
+        if ("com.ivi.musicplayer".equals(pkg)) return "恢复原厂音乐播放器及入口，不自动切换当前音源或默认播放器。";
+        return "恢复原厂软件到当前用户并启用，保留用户当前默认应用设置。";
     }
     public static void requireRemovable(String pkg) {
         if (entry(pkg) == null) throw new SecurityException("此程序受保护，禁止删除：" + pkg);
@@ -63,7 +78,7 @@ public final class Policy {
     public static String installLabel(String pkg, String fallback) {
         if (pkg.equals("com.tencent.qqmusiccar")) return "QQ音乐车机版";
         if (pkg.equals("com.car.adbswitch")) return "ADB 工具";
-        if (pkg.equals("com.shihab.diplay.wmex5")) return "DiPlay";
+        if (pkg.equals("com.shihab.diplay.wmex5")) return "WePlay / DiPlay";
         if (pkg.equals("com.wmhome.launcher")) return "威马桌面";
         if (pkg.equals("com.estrongs.android.pop")) return "ES 文件管理器";
         if (pkg.equals("info.kfsoft.force.rotation")) return "强制旋转";

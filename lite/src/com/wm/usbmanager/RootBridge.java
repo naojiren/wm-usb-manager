@@ -100,13 +100,13 @@ public final class RootBridge {
         if (action.equals("inventory")) return inventory();
         if (action.equals("storage")) return ok("空间已刷新").put("storage", storage());
         if (action.equals("install-guide") && !validation && !resident) {
-            if (!usbReady() || !installed(Policy.PACKAGE)) throw new IOException("请从完整 U 盘启动向导后安装");
+            if (!usbReady() || !installed(Policy.PACKAGE)) throw new IOException("请从完整 U 盘启动管家后安装");
             File destination = new File("/data/local/wm-software-wizard"); destination.mkdirs();
             run("chown 0:0 /data/local/wm-software-wizard && chmod 700 /data/local/wm-software-wizard", 10);
             if (!destination.isDirectory() || !destination.getCanonicalFile().equals(destination)) throw new IOException("车机工作目录创建失败");
             android.system.StructStat ds = android.system.Os.stat(destination.getPath());
             if (ds.st_uid != 0 || (ds.st_mode & 0777) != 0700) throw new IOException("车机工作目录权限错误");
-            return ok("向导已安装到车机。拔出 U 盘后从应用列表打开，仅保留卸载和两款软件联网更新安装；不复制内置软件。重启后需要已有 su 授权。");
+            return ok("管家已安装到车机。拔出 U 盘后从应用列表打开，仅保留卸载和两款软件联网更新安装；不复制内置软件。重启后需要已有 su 授权。");
         }
         if (resident && action.equals("restore")) throw new SecurityException("车机版没有原厂恢复包");
         if (action.equals("probe-keyboard") && validation) return probeKeyboard();
@@ -307,7 +307,7 @@ public final class RootBridge {
             if (!android.system.OsConstants.S_ISREG(st.st_mode) || st.st_nlink != 1 || !file.delete()) { skipped++; continue; }
             deleted++; bytes += item.size; detail.append(item.name).append('\n');
         }
-        String message = "已清理 " + deleted + " 个临时文件，删除文件合计约 " + String.format(Locale.ROOT, "%.1f", bytes / 1048576.0) + " MiB；跳过 " + skipped + " 个变化或使用中的文件。备份、应用数据及向导工作目录保留。";
+        String message = "已清理 " + deleted + " 个临时文件，删除文件合计约 " + String.format(Locale.ROOT, "%.1f", bytes / 1048576.0) + " MiB；跳过 " + skipped + " 个变化或使用中的文件。备份、应用数据及管家工作目录保留。";
         journal("cleanup", "debug-temp", true, message + "\n" + detail);
         cleanupItems.clear();
         return ok(message).put("storage", storage()).put("deleted", deleted).put("skipped", skipped);
@@ -431,6 +431,18 @@ public final class RootBridge {
             if (!enabledBefore.contains(Policy.IME)) run("ime disable " + Policy.quote(Policy.IME), 20);
         }
     }
+    private String replaceAmapConflict() throws Exception {
+        PackageInfo existing = pm.getPackageInfo(AmapInstall.PACKAGE, INCLUDE_REMOVED);
+        if (existing.applicationInfo == null) throw new IOException("无法核对旧高德是否为系统应用，已停止重装");
+        boolean originalSystem = (existing.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+        try {
+            String result = AmapInstall.replaceConflict(AmapInstall.PACKAGE, originalSystem, run("pm list users", 20),
+                command -> run(command, 90), () -> Policy.packageNames(run("pm list packages -u --user 0", 20)).contains(AmapInstall.PACKAGE));
+            journal("replace-amap-conflict", AmapInstall.PACKAGE, true, result); return result;
+        } catch (Exception e) {
+            journal("replace-amap-conflict", AmapInstall.PACKAGE, false, cleanError(e)); throw e;
+        }
+    }
     private JSONObject install(String name, String expected, boolean grant, boolean systemLauncher) throws Exception {
         File file = Policy.apk(root, name);
         ScanPolicy.Selection selected = requireSelected(name, file, expected);
@@ -455,7 +467,7 @@ public final class RootBridge {
             if (resident && !p.packageName.equals("com.wmhome.launcher") && !p.packageName.equals("com.shihab.diplay.wmex5")) throw new SecurityException("车机版仅安装桌面和 WePlay");
             String problem = compatible(staged, p);
             if (!problem.isEmpty()) throw new IOException(problem);
-            String preparation = "";
+            String preparation = ""; boolean conflictReplaced = false;
             if (AmapInstall.applies(p.packageName)) {
                 boolean present;
                 try { pm.getPackageInfo(AmapInstall.PACKAGE, INCLUDE_REMOVED); present = true; }
@@ -465,7 +477,13 @@ public final class RootBridge {
                     boolean active = previous != null && previous.applicationInfo != null
                         && previous.applicationInfo.sourceDir != null && new File(previous.applicationInfo.sourceDir).isFile()
                         && installed(AmapInstall.PACKAGE);
-                    preparation = AmapInstall.beforeInstall(p.packageName, present, active,
+                    PackageInfo signer = null;
+                    try { signer = pm.getPackageInfo(AmapInstall.PACKAGE, INCLUDE_REMOVED | PackageManager.GET_SIGNATURES); }
+                    catch (PackageManager.NameNotFoundException absent) { }
+                    boolean mismatch = signer != null && signer.signatures != null && signer.signatures.length > 0
+                        && p.signatures != null && p.signatures.length > 0 && !sameSigner(p, signer);
+                    if (mismatch) { preparation = replaceAmapConflict(); conflictReplaced = true; }
+                    else preparation = AmapInstall.beforeInstall(p.packageName, present, active,
                         command -> run(command, 90), () -> RetainedAmapData.clearForOwner());
                     journal("clear-amap-data", p.packageName, true, preparation);
                 } catch (Exception e) {
@@ -474,6 +492,11 @@ public final class RootBridge {
                 }
             }
             String output = run("pm install -r " + (grant ? "-g " : "") + Policy.quote(staged.getAbsolutePath()), 150);
+            if (!conflictReplaced && AmapInstall.signatureConflict(p.packageName, output)) {
+                if (!expectedDigest.equals(sha(staged))) throw new IOException("安装包在处理签名冲突前已变化，已停止重装");
+                preparation = replaceAmapConflict(); conflictReplaced = true;
+                output = run("pm install -r " + (grant ? "-g " : "") + Policy.quote(staged.getAbsolutePath()), 150);
+            }
             PackageInfo now = packageInfo(p.packageName, false);
             boolean success = output.contains("Success") && installed(p.packageName) && now != null && now.versionCode == p.versionCode;
             if (success) {
@@ -503,7 +526,7 @@ public final class RootBridge {
         File cache = new File(pm.getApplicationInfo(Policy.PACKAGE, 0).dataDir, "cache/updates").getCanonicalFile();
         File source = new File(q.getString("source")).getCanonicalFile();
         if (!cache.equals(source.getParentFile()) || !source.getName().matches("download-[a-f0-9-]{36}\\.apk") || !source.isFile())
-            throw new SecurityException("更新文件必须来自向导的下载缓存");
+            throw new SecurityException("更新文件必须来自管家的下载缓存");
         String oldName = q.optString("oldName"), oldToken = q.optString("oldToken", q.optString("oldSha256")), oldSha = ""; File old = null;
         if (!oldName.isEmpty()) {
             old = Policy.apk(root, oldName);

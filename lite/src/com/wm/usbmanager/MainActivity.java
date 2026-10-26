@@ -32,7 +32,7 @@ public final class MainActivity extends Activity {
     private boolean resident, systemLauncher = true;
     private boolean scanning, ready, busy, grant = true, validationMode;
     private int page;
-    private String summary = "", stateText = "向导已打开 · 即将扫描车机软件和 U 盘安装包…";
+    private String summary = "", stateText = "管家已打开 · 即将扫描车机软件和 U 盘安装包…";
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved); resident = !getIntent().getBooleanExtra("validation", false) && !getIntent().getBooleanExtra("usb_mode", false); BridgeClient.resident = resident; validationMode = getIntent().getBooleanExtra("validation", false); layout();
         android.util.Log.i("WMUsbManager", "UI_CREATED " + android.os.SystemClock.elapsedRealtime());
@@ -52,7 +52,7 @@ public final class MainActivity extends Activity {
         root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(d(24), d(16), d(24), d(12));
         root.setBackgroundColor(Color.rgb(234, 241, 244)); setContentView(root);
         LinearLayout heading = new LinearLayout(this); heading.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        heading.addView(text("威马车机软件向导", 30, true), new LinearLayout.LayoutParams(0, -2, 1));
+        heading.addView(text("威马软件管家", 30, true), new LinearLayout.LayoutParams(0, -2, 1));
         heading.addView(button("刷新", v -> refresh()));
         heading.addView(button("退出", v -> { if (!busy || scanning) finish(); })); root.addView(heading);
         state = text(stateText, 17, false); state.setPadding(0, d(8), 0, d(8)); root.addView(state);
@@ -133,7 +133,7 @@ public final class MainActivity extends Activity {
                     ready = false;
                     status(connected ? "软件扫描未完成，请点刷新重试。" : resident ? "权限通道未就绪，请检查已有 su 授权。" : "权限通道未就绪，请通过 U 盘入口重新启动。");
                     summary = (connected ? "扫描失败：" : "权限通道未就绪：") + RootBridge.cleanError(e); scanning = false; setBusy(false);
-                    progressBar.setVisibility(View.GONE); current.setText(connected ? "扫描未完成，请查看具体错误后刷新" : "权限通道连接失败，请重新启动向导"); current.setTextColor(ERROR); render();
+                    progressBar.setVisibility(View.GONE); current.setText(connected ? "扫描未完成，请查看具体错误后刷新" : "权限通道连接失败，请重新启动管家"); current.setTextColor(ERROR); render();
                 });
             }
         });
@@ -144,11 +144,11 @@ public final class MainActivity extends Activity {
         RootBridge.run("su -c " + Policy.quote(command), 15);
     }
     private void installGuide() {
-        if (busy || !ready) return; setBusy(true); current.setText("正在安装向导到车机…");
+        if (busy || !ready) return; setBusy(true); current.setText("正在安装管家到车机…");
         worker.submit(() -> { String message;
             try { JSONObject reply = BridgeClient.call(new JSONObject().put("action", "install-guide")); message = reply.optString("message"); }
             catch (Exception e) { message = RootBridge.cleanError(e); }
-            final String result = message; runOnUiThread(() -> { setBusy(false); current.setText(result); largeDialog(new android.app.AlertDialog.Builder(this).setTitle("安装向导到车机").setMessage(result).setPositiveButton("完成", null).show()); });
+            final String result = message; runOnUiThread(() -> { setBusy(false); current.setText(result); largeDialog(new android.app.AlertDialog.Builder(this).setTitle("安装管家到车机").setMessage(result).setPositiveButton("完成", null).show()); });
         });
     }
     private void awaitBridge() throws Exception {
@@ -199,8 +199,8 @@ public final class MainActivity extends Activity {
         }
         if (page == 0) {
             title.setText("选择要移除的软件"); title.setTextColor(ERROR);
-            hint.setText("精简版不备份软件、不提供原厂恢复包。百度地图和语音输入法默认勾选；第三方软件单独列出、默认不选。删除时保留应用数据。");
-            if (resident) hint.setText("原厂软件从当前用户移除，保留系统 APK。第三方软件默认不选；系统、当前桌面和正在使用的基础服务受保护。此车机版不附恢复包。");
+            hint.setText("精简版不备份软件、不提供原厂恢复包。百度地图、语音输入法和BTPhone默认勾选，可取消；第三方软件单独列出、默认不选。删除时保留应用数据。");
+            if (resident) hint.setText("BTPhone默认勾选，可取消；原厂软件从当前用户移除，保留系统 APK。第三方软件默认不选；系统、当前桌面和正在使用的基础服务受保护。此车机版不附恢复包。");
             cleanupCard();
             boolean thirdPartyHeading = false, protectedHeading = false;
             for (int i = 0; i < apps.length(); i++) {
@@ -220,7 +220,7 @@ public final class MainActivity extends Activity {
         } else if (page == 1) {
             title.setText("选择要安装的软件"); title.setTextColor(BLUE);
             hint.setText("默认仅选 ADB 工具、DiPlay、威马桌面、ES 文件管理器和强制旋转。其它软件按需勾选；不兼容或较旧版本不可选。特殊权限由软件首次使用时提示。");
-            if (!resident) { LinearLayout keep = card(); keep.addView(text("把向导留在车机", 22, true)); keep.addView(text("无需携带 U 盘即可卸载软件、查询并安装桌面与 WePlay 更新。不复制内置软件。", 17, false)); keep.addView(button("安装向导到车机", v -> installGuide())); }
+            if (!resident) { LinearLayout keep = card(); keep.addView(text("把管家留在车机", 22, true)); keep.addView(text("无需携带 U 盘即可卸载软件、查询并安装桌面与 WePlay 更新。不复制内置软件。", 17, false)); keep.addView(button("安装管家到车机", v -> installGuide())); }
             updateCard("wm-launcher", "威马桌面"); updateCard("diplay-wm", "WePlay / DiPlay"); if (resident) hint.setText("查询 GitHub 最新发布，点击下载安装。桌面默认写入系统分区，下载缓存仅包含你选择的两款软件。");
             if (!resident) {
             LinearLayout select = new LinearLayout(this);
@@ -271,7 +271,7 @@ public final class MainActivity extends Activity {
         String estimate = cleanupStatus.equals("ready") ? "识别到可选临时文件 " + space(cleanupData.optLong("bytes")) + "，共 " + cleanupData.optInt("count") + " 个。"
             : cleanupStatus.equals("unavailable") ? "清理统计读取失败，请查看原因后刷新。" : "临时文件尚未统计完成，请刷新。";
         c.addView(text(estimate, 19, true));
-        c.addView(text("识别旧测试 APK、日志、截图和向导遗留安装中转包，不再限制24小时。不清空整个目录；保留备份、应用数据和正在使用的文件，实际释放量以结果为准。", 17, false));
+        c.addView(text("识别旧测试 APK、日志、截图和管家遗留安装中转包，不再限制24小时。不清空整个目录；保留备份、应用数据和正在使用的文件，实际释放量以结果为准。", 17, false));
         if (cleanupStatus.equals("ready")) c.addView(text("顶层备份文件保留 " + space(cleanupData.optLong("backupBytes")) + "；未分类文件保留 " + space(cleanupData.optLong("unknownBytes")) + "。目录及应用数据不计入本项。", 17, false));
         if (cleanupStatus.equals("ready") && cleanupData.optInt("count") == 0) c.addView(text("没有识别到可清理临时文件。空间也可能由已安装软件、应用数据或备份占用。", 17, false));
         if (cleanupData.has("error")) c.addView(text(cleanupData.optString("error"), 17, false));
@@ -300,6 +300,9 @@ public final class MainActivity extends Activity {
             check.setChecked(Boolean.TRUE.equals(removal.get(pkg))); check.setEnabled(a.optBoolean("installed") && a.optBoolean("removable", true) && ready && !busy);
             check.setOnCheckedChangeListener((v, checked) -> removal.put(pkg, checked)); c.addView(check);
         c.addView(text(pkg, 13, false));
+        if (!Policy.removalWarning(pkg).isEmpty()) {
+            TextView warning = text(Policy.removalWarning(pkg), 21, true); warning.setTextColor(ERROR); c.addView(warning);
+        }
         TextView desc = text(a.optString("description"), 17, false); desc.setPadding(d(8), 0, 0, 0); c.addView(desc);
     }
     private void apkRow(JSONObject a) {
@@ -357,7 +360,7 @@ public final class MainActivity extends Activity {
         worker.submit(() -> {
             int success = 0; StringBuilder log = new StringBuilder(), completedLog = new StringBuilder();
             for (int i = 0; i < jobs.size(); i++) {
-                JSONObject a = jobs.get(i); final String progress = (install && AmapInstall.applies(a.optString("package")) ? "正在校验、清除高德应用数据并安装 " : install ? "正在安装 " : "正在删除 ") + (i + 1) + "/" + jobs.size() + " · " + a.optString("label");
+                JSONObject a = jobs.get(i); final String progress = (install && AmapInstall.applies(a.optString("package")) ? "正在校验、清理高德并处理签名冲突后安装 " : install ? "正在安装 " : "正在删除 ") + (i + 1) + "/" + jobs.size() + " · " + a.optString("label");
                 runOnUiThread(() -> { status(progress); current.setText(progress); current.setTextColor(WORKING); });
                 boolean itemSuccess = false;
                 try {
@@ -365,7 +368,7 @@ public final class MainActivity extends Activity {
                     if (install) q.put("name", a.getString("name")).put("token", a.getString("token")).put("grant", grantNow).put("systemLauncher", systemLauncher);
                     else if (a.optString("kind").equals("cleanup")) q.put("action", "cleanup").put("token", a.getString("token"));
                     else q.put("package", a.getString("package"));
-                    JSONObject r = BridgeClient.call(q, validationMode, install && AmapInstall.applies(a.optString("package")) ? 300000 : 180000);
+                    JSONObject r = BridgeClient.call(q, validationMode, install && AmapInstall.applies(a.optString("package")) ? 540000 : 180000);
                     itemSuccess = r.optBoolean("ok"); if (itemSuccess) success++;
                     log.append(r.optBoolean("ok") ? "✓ " : "✗ ").append(a.optString("label")).append("：").append(r.optString("message")).append('\n');
                 } catch (Exception e) { log.append("✗ ").append(a.optString("label")).append("：").append(RootBridge.cleanError(e)).append('\n'); }

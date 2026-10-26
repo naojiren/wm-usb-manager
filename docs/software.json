@@ -1,21 +1,25 @@
 [
   {
-    "file": "adb工具.apk",
+    "file": "adb_toggle.apk",
     "package": "com.car.adbswitch",
     "versionName": "1.0",
     "versionCode": 1,
     "minSdk": 21,
     "abis": [],
-    "sha256": "5dc66caceacda47b341fcf7fbe4099ee6fe633c52308f8561d863eacbcc974eb",
-    "label": "ADB 工具",
-    "description": "车机 ADB 开关，便于连接调试和管理软件。",
+    "certificateSha256": [
+      "67a8ae7410950af4822fb29f85391cbbfef4d29cce5e677a9da376bda1b27e17"
+    ],
+    "bytes": 20971,
+    "sha256": "f913df8274508e48cbb05a8747859769f7be1af3633f8a52df9f15636276c6f0",
     "selected": true,
-    "priority": 0
+    "priority": 0,
+    "label": "ADB 工具",
+    "description": "车机ADB开关，使用用户提供的adb_toggle.apk，保留默认勾选。"
   },
   {
     "package": "com.shihab.diplay.wmex5",
-    "versionName": "0.2.17-legacy.1-wm-ex5-perf32-scan-test",
-    "versionCode": 76,
+    "versionName": "0.2.17-legacy.1-wm-ex5-perf34-bt-defaults-test",
+    "versionCode": 78,
     "minSdk": 19,
     "abis": [
       "armeabi-v7a"
@@ -23,30 +27,30 @@
     "certificateSha256": [
       "89a94fd5d7d32fdd26d81c3827c74bb3dc215af91d1fcff0661fd8e1d2c13509"
     ],
-    "bytes": 12870225,
-    "sha256": "4103cf1a6e396f69d4806033c52016eb811571d0c13ed75c80bab2aa8ab89250",
-    "file": "WePlay-perf32-scan-test-armv7.apk",
-    "label": "DiPlay",
-    "description": "CarPlay 连接与投屏，适用于此威马车机版本。",
+    "bytes": 12871377,
+    "sha256": "fe580b0b3df61923fe6fb9a4d50b61afe1ef3164486816fc493af4ed46cbe637",
+    "file": "WePlay-perf34-bt-defaults-armv7.apk",
     "selected": true,
-    "priority": 1
+    "priority": 1,
+    "label": "WePlay / DiPlay（perf34蓝牙默认设置测试版）",
+    "description": "默认开启原车蓝牙音频、停用WePlay麦克风；升级首次启动应用一次，随后保留手动选择。需手机连接原车蓝牙。"
   },
   {
     "package": "com.wmhome.launcher",
-    "versionName": "0.1.0-wm32",
-    "versionCode": 1032,
+    "versionName": "0.1.0-wm35",
+    "versionCode": 1035,
     "minSdk": 23,
     "abis": [],
     "certificateSha256": [
       "e2db4c74775d527181c7ca92959fbffaffd273ee2dbff7a143fc8c28687fa1ba"
     ],
-    "bytes": 1372077,
-    "sha256": "9c69a9058bc848dfc85cbfad60905e6d951df8216f9980e92396ab9bb70b1f72",
-    "file": "WM-Launcher-0.1.0-wm32-android6.apk",
-    "label": "威马桌面",
-    "description": "威马车机桌面；安装后可自行选择默认桌面。",
+    "bytes": 1377213,
+    "sha256": "2bc3f784df890313dfa65b91ee228b0047e3fc406fe30555c4cc1950822ba584",
+    "file": "WM-Launcher-0.1.0-wm35-android6.apk",
     "selected": true,
-    "priority": 2
+    "priority": 2,
+    "label": "威马桌面 wm35",
+    "description": "威马车机桌面wm35，音乐卡片和原车蓝牙音乐控制更新；默认可安装到系统分区。"
   },
   {
     "file": "6ES文件浏览器v4.2.0.2.3(10034).apk",
@@ -203,13 +207,13 @@
     "certificateSha256": [
       "fb86d2d0bb563e97606e0a862f77d039441b3f4695bd93ed30b1a75a8de3de4b"
     ],
-    "bytes": 135684304,
-    "sha256": "c8fb3f9b543cacdff1b59d2bead0e7add7a5f63c7f1fe7a44d498e378d38b2e0",
-    "file": "高德_V9.1_仪表指引后台投屏_测试11.apk",
-    "label": "高德地图 V9.1（仪表指引与后台投屏·测试11）",
-    "description": "可选。高德V9.1仪表指引与后台投屏测试11，无需另装仪表伴侣。安装前自动清除高德应用数据，收藏、账号、设置及离线地图可能丢失。V9.1仍在测试中。",
+    "bytes": 135798992,
+    "sha256": "d8bf7dbc076a9282777c8577ba378c50240009f3eb52244ebb579dd5eeed952c",
+    "file": "高德_V9.1_仪表指引后台投屏_单APP测试15.apk",
     "selected": false,
-    "priority": 100
+    "priority": 100,
+    "label": "高德地图 V9.1（仪表指引与后台投屏·测试15）",
+    "description": "可选。速度表、退出指引残留及巡航红绿灯显示调整。安装会清除数据，普通签名冲突时完整卸载旧高德重装。"
   },
   {
     "package": "com.tencent.qqmusiccar",
